@@ -1,15 +1,11 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
+import { wibToday, wibTodayStr, wibDayStart } from "@/lib/dates";
 
 export async function getKpis() {
-  const today = startOfToday();
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const today = wibToday();
+  // Awal bulan kalender WIB (sebagai momen timestamp)
+  const monthStart = wibDayStart(wibTodayStr().slice(0, 8) + "01");
 
   const [open, inProgress, pending, closedThisMonth, overdue, closedAll] =
     await Promise.all([
@@ -41,10 +37,10 @@ export async function getKpis() {
 
 /** Tren 8 minggu terakhir: dilaporkan vs selesai per minggu. */
 export async function getWeeklyTrend() {
-  const today = startOfToday();
-  // Mulai dari Senin, 8 minggu ke belakang
+  const today = wibToday();
+  // Senin minggu WIB berjalan (ISO: Senin=0 offset), lalu 7 minggu ke belakang
   const start = new Date(today);
-  start.setDate(start.getDate() - start.getDay() + 1 - 7 * 7);
+  start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7) - 7 * 7);
 
   const [reported, closed] = await Promise.all([
     prisma.finding.findMany({
@@ -61,7 +57,7 @@ export async function getWeeklyTrend() {
     [];
   for (let i = 0; i < 8; i++) {
     const ws = new Date(start);
-    ws.setDate(ws.getDate() + i * 7);
+    ws.setUTCDate(ws.getUTCDate() + i * 7);
     weeks.push({
       label: ws.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
       start: ws,
@@ -117,8 +113,8 @@ export async function getAreaScores() {
 
 /** Temuan overdue ≥3 hari — perlu eskalasi. */
 export async function getEscalations() {
-  const cutoff = startOfToday();
-  cutoff.setDate(cutoff.getDate() - 3);
+  const cutoff = wibToday();
+  cutoff.setUTCDate(cutoff.getUTCDate() - 3);
   return prisma.finding.findMany({
     where: { status: { not: "CLOSED" }, dueDate: { lt: cutoff } },
     orderBy: { dueDate: "asc" },

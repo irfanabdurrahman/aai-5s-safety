@@ -5,6 +5,7 @@ import { BottomNav, Sidebar } from "@/components/layout/AppNav";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ROLE_LABELS } from "@/lib/rbac";
 import { IconShield } from "@/components/icons";
+import { Initials } from "@/components/ui/Initials";
 
 export default async function AppLayout({
   children,
@@ -51,17 +52,8 @@ export default async function AppLayout({
           </Link>
           <div className="flex-1" />
           <NotificationBell />
-          <Link
-            href="/profil"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-soft text-xs font-extrabold text-brand"
-            title={user.name}
-          >
-            {user.name
-              .split(" ")
-              .slice(0, 2)
-              .map((s) => s[0])
-              .join("")
-              .toUpperCase()}
+          <Link href="/profil" title={user.name}>
+            <Initials name={user.name} />
           </Link>
         </header>
 

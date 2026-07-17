@@ -6,7 +6,7 @@ import { startAudit, startAdhocAudit } from "@/actions/audits";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { AUDIT_STATUS_META, formatDate } from "@/lib/labels";
+import { AUDIT_STATUS_META, formatDate, scoreBand } from "@/lib/labels";
 import { AdhocAuditForm } from "./AdhocAuditForm";
 
 export const metadata: Metadata = { title: "Audit 5S" };
@@ -45,7 +45,9 @@ export default async function AuditPage() {
         </p>
       </div>
 
-      <AdhocAuditForm areas={areas} action={startAdhocAudit} />
+      {user.role !== "KARYAWAN" && (
+        <AdhocAuditForm areas={areas} action={startAdhocAudit} />
+      )}
 
       {active.length > 0 && (
         <Card>
@@ -111,13 +113,7 @@ export default async function AuditPage() {
                     </p>
                   </div>
                   <span
-                    className={`text-lg font-extrabold ${
-                      (a.totalScore ?? 0) >= 80
-                        ? "text-ok"
-                        : (a.totalScore ?? 0) >= 60
-                          ? "text-warn"
-                          : "text-danger"
-                    }`}
+                    className={`text-lg font-extrabold ${scoreBand(a.totalScore ?? 0).text}`}
                   >
                     {a.totalScore?.toFixed(0)}%
                   </span>

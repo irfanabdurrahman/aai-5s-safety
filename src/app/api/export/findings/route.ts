@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifySession, SESSION_COOKIE } from "@/lib/session";
+import { apiUser } from "@/lib/api-auth";
+import { wibDayStart } from "@/lib/dates";
 import { toCsv } from "@/lib/csv";
 import {
   STATUS_META,
@@ -16,18 +17,19 @@ function fmtDate(d: Date | null) {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await verifySession(
-    request.cookies.get(SESSION_COOKIE)?.value,
-  );
-  if (!session || (session.role !== "ADMIN" && session.role !== "SUPERVISOR")) {
+  const user = await apiUser(request, ["ADMIN", "SUPERVISOR"]);
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const sp = request.nextUrl.searchParams;
   const where: Prisma.FindingWhereInput = {};
-  if (sp.get("dari")) where.createdAt = { gte: new Date(sp.get("dari")!) };
+  // Batas tanggal mengikuti hari kalender WIB
+  if (sp.get("dari")) {
+    where.createdAt = { gte: wibDayStart(sp.get("dari")!) };
+  }
   if (sp.get("sampai")) {
-    const end = new Date(sp.get("sampai")!);
+    const end = wibDayStart(sp.get("sampai")!);
     end.setDate(end.getDate() + 1);
     where.createdAt = { ...(where.createdAt as object), lt: end };
   }

@@ -9,6 +9,7 @@ import { savePhoto } from "@/lib/upload";
 import { nextFindingNumber } from "@/lib/numbering";
 import { notify, departmentSupervisors } from "@/lib/workflow";
 import type { ActionState } from "@/actions/auth";
+import { wibToday } from "@/lib/dates";
 
 export type AuditFindingState = ActionState & { findingNumber?: string };
 
@@ -23,9 +24,15 @@ export async function startAdhocAudit(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireUser();
+  // Audit hanya oleh PIC area ke atas — bukan karyawan umum
+  const user = await requireUser(["PIC_AREA", "SUPERVISOR", "ADMIN"]);
   const parsed = adhocSchema.safeParse({ areaId: formData.get("areaId") });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const area = await prisma.area.findUnique({
+    where: { id: parsed.data.areaId },
+  });
+  if (!area || !area.isActive) return { error: "Area tidak ditemukan" };
 
   const template = await prisma.checklistTemplate.findFirst({
     where: { isActive: true },
@@ -37,11 +44,11 @@ export async function startAdhocAudit(
 
   const audit = await prisma.audit.create({
     data: {
-      areaId: parsed.data.areaId,
+      areaId: area.id,
       templateId: template.id,
       auditorId: user.id,
       status: "IN_PROGRESS",
-      scheduledDate: new Date(),
+      scheduledDate: wibToday(),
       conductedAt: new Date(),
     },
   });
@@ -93,6 +100,18 @@ export async function saveScore(
   }
   if (audit.auditorId !== user.id && user.role !== "ADMIN") {
     return { error: "Kamu bukan auditor audit ini" };
+  }
+
+  // Kriteria harus bagian dari template audit ini & masih aktif
+  const criterion = await prisma.checklistCriterion.findUnique({
+    where: { id: parsed.data.criterionId },
+  });
+  if (
+    !criterion ||
+    !criterion.isActive ||
+    criterion.templateId !== audit.templateId
+  ) {
+    return { error: "Kriteria tidak valid untuk audit ini" };
   }
 
   await prisma.auditScore.upsert({
@@ -223,15 +242,18 @@ export async function submitAudit(
     return { error: "Kamu bukan auditor audit ini" };
   }
 
-  const totalCriteria = audit.template.criteria.length;
-  if (audit.scores.length < totalCriteria) {
+  // Hanya skor untuk kriteria aktif template ini yang dihitung
+  const activeIds = new Set(audit.template.criteria.map((c) => c.id));
+  const validScores = audit.scores.filter((s) => activeIds.has(s.criterionId));
+  const totalCriteria = activeIds.size;
+  if (validScores.length < totalCriteria) {
     return {
-      error: `Masih ada ${totalCriteria - audit.scores.length} kriteria yang belum dinilai`,
+      error: `Masih ada ${totalCriteria - validScores.length} kriteria yang belum dinilai`,
     };
   }
 
   const totalScore =
-    (audit.scores.reduce((s, x) => s + x.score, 0) / (totalCriteria * 4)) * 100;
+    (validScores.reduce((s, x) => s + x.score, 0) / (totalCriteria * 4)) * 100;
 
   await prisma.audit.update({
     where: { id },

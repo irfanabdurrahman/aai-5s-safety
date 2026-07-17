@@ -6,7 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { FindingCard } from "@/components/findings/FindingCard";
-import { PILLAR_META, PILLAR_ORDER, formatDate } from "@/lib/labels";
+import { FINDING_CARD_SELECT } from "@/components/findings/finding-card-select";
+import { PILLAR_META, PILLAR_ORDER, formatDate, scoreBand } from "@/lib/labels";
 import { PillarRadar } from "./PillarRadar";
 
 export const metadata: Metadata = { title: "Hasil Audit" };
@@ -26,24 +27,7 @@ export default async function AuditHasilPage({
       auditor: { select: { name: true } },
       template: true,
       scores: { include: { criterion: true } },
-      findings: {
-        select: {
-          id: true,
-          number: true,
-          source: true,
-          status: true,
-          riskLevel: true,
-          safetyCategory: true,
-          pillar: true,
-          description: true,
-          dueDate: true,
-          createdAt: true,
-          area: { select: { name: true, department: { select: { code: true } } } },
-          reporter: { select: { name: true } },
-          pic: { select: { name: true } },
-          photos: { where: { type: "BEFORE" }, take: 1, select: { filePath: true } },
-        },
-      },
+      findings: { select: FINDING_CARD_SELECT },
     },
   });
   if (!audit || audit.status !== "SUBMITTED") notFound();
@@ -82,21 +66,14 @@ export default async function AuditHasilPage({
       <Card>
         <CardBody className="flex flex-col items-center gap-4 sm:flex-row">
           <div className="text-center">
-            <p
-              className={`text-5xl font-extrabold ${
-                score >= 80 ? "text-ok" : score >= 60 ? "text-warn" : "text-danger"
-              }`}
-            >
+            <p className={`text-5xl font-extrabold ${scoreBand(score).text}`}>
               {score.toFixed(0)}%
             </p>
             <p className="mt-1 text-xs font-bold text-muted">
               Skor 5S keseluruhan
             </p>
-            <Badge
-              tone={score >= 80 ? "ok" : score >= 60 ? "warn" : "danger"}
-              className="mt-2"
-            >
-              {score >= 80 ? "Baik" : score >= 60 ? "Perlu Perbaikan" : "Kritis"}
+            <Badge tone={scoreBand(score).tone} className="mt-2">
+              {scoreBand(score).label}
             </Badge>
           </div>
           <div className="flex-1">
@@ -113,9 +90,7 @@ export default async function AuditHasilPage({
               <span className="w-16 shrink-0 text-xs font-bold">{p.label}</span>
               <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-background">
                 <div
-                  className={`h-full rounded-full ${
-                    p.pct >= 80 ? "bg-ok" : p.pct >= 60 ? "bg-warn" : "bg-danger"
-                  }`}
+                  className={`h-full rounded-full ${scoreBand(p.pct).bg}`}
                   style={{ width: `${p.pct}%` }}
                 />
               </div>

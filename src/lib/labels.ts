@@ -6,6 +6,7 @@ import type {
   FindingSource,
   AuditStatus,
 } from "@/generated/prisma/enums";
+import { wibToday } from "@/lib/dates";
 
 type Tone = "brand" | "accent" | "ok" | "warn" | "danger" | "info" | "neutral";
 
@@ -97,13 +98,32 @@ export function formatDateTime(d: Date | string | null | undefined): string {
   });
 }
 
-/** Terlambat = due lewat & belum selesai (dihitung, bukan status). */
+/** Terlambat = due lewat (hari kalender WIB) & belum selesai — SATU-SATUNYA
+ *  definisi overdue; dipakai badge, grouping, KPI, dan jobs. */
 export function isOverdue(f: {
   dueDate: Date | null;
   status: FindingStatus;
 }): boolean {
   if (!f.dueDate || f.status === "CLOSED") return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return f.dueDate < today;
+  // dueDate = UTC-midnight tanggal WIB (lihat lib/dates.ts)
+  return new Date(f.dueDate) < wibToday();
+}
+
+/** Band skor 5S — SATU-SATUNYA definisi ambang (>=80 baik, >=60 perlu perbaikan). */
+export function scoreBand(score: number): {
+  tone: Tone;
+  text: string;
+  bg: string;
+  label: string;
+} {
+  if (score >= 80)
+    return { tone: "ok", text: "text-ok", bg: "bg-ok", label: "Baik" };
+  if (score >= 60)
+    return {
+      tone: "warn",
+      text: "text-warn",
+      bg: "bg-warn",
+      label: "Perlu Perbaikan",
+    };
+  return { tone: "danger", text: "text-danger", bg: "bg-danger", label: "Kritis" };
 }

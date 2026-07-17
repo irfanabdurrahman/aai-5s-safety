@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
+import { parseDateOnly } from "@/lib/dates";
 import type { ActionState } from "@/actions/auth";
 
 const criterionSchema = z.object({
@@ -93,7 +94,7 @@ export async function createSchedule(
   });
   if (!template) return { error: "Belum ada template checklist aktif" };
 
-  const startDate = new Date(parsed.data.startDate + "T00:00:00+07:00");
+  const startDate = parseDateOnly(parsed.data.startDate);
   const schedule = await prisma.auditSchedule.create({
     data: {
       areaId: parsed.data.areaId,
@@ -108,7 +109,7 @@ export async function createSchedule(
   });
 
   // Buat audit pertama langsung agar auditor melihat tugasnya
-  await prisma.audit.create({
+  const firstAudit = await prisma.audit.create({
     data: {
       scheduleId: schedule.id,
       areaId: schedule.areaId,
@@ -124,7 +125,7 @@ export async function createSchedule(
       type: "AUDIT_DUE",
       title: "Kamu dijadwalkan audit 5S",
       body: `Mulai ${parsed.data.startDate}`,
-      auditId: null,
+      auditId: firstAudit.id,
     },
   });
 

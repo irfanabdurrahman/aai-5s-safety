@@ -6,8 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { savePhoto } from "@/lib/upload";
 import { nextFindingNumber } from "@/lib/numbering";
+import { parseDateOnly, toDateStr, wibToday } from "@/lib/dates";
 import {
-  canTransition,
+  transitionFinding,
   notify,
   departmentSupervisors,
   type FindingForWorkflow,
@@ -49,6 +50,26 @@ function revalidateFinding(id: string) {
   revalidatePath("/");
 }
 
+async function savePhotos(
+  formData: FormData,
+  required: boolean,
+): Promise<{ paths?: string[]; error?: string }> {
+  const photos = formData
+    .getAll("photos")
+    .filter((f): f is File => f instanceof File && f.size > 0);
+  if (photos.length === 0) {
+    return required
+      ? { error: "Foto wajib dilampirkan" }
+      : { paths: [] };
+  }
+  if (photos.length > 4) return { error: "Maksimal 4 foto" };
+  try {
+    return { paths: await Promise.all(photos.map((p) => savePhoto(p))) };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Gagal menyimpan foto" };
+  }
+}
+
 // ------------------------------------------------------------
 // Lapor temuan safety (ad-hoc)
 // ------------------------------------------------------------
@@ -68,30 +89,28 @@ export async function createSafetyReport(
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-  const photos = formData
-    .getAll("photos")
-    .filter((f): f is File => f instanceof File && f.size > 0);
-  if (photos.length === 0) {
-    return { error: "Foto kondisi temuan wajib dilampirkan" };
-  }
-  if (photos.length > 4) return { error: "Maksimal 4 foto" };
-
   const area = await prisma.area.findUnique({
     where: { id: parsed.data.areaId },
     include: { department: true },
   });
   if (!area || !area.isActive) return { error: "Area tidak ditemukan" };
 
-  let paths: string[];
-  try {
-    paths = await Promise.all(photos.map((p) => savePhoto(p)));
-  } catch (e) {
-    return { error: e instanceof Error ? e.message : "Gagal menyimpan foto" };
+  // Line (opsional) harus milik area yang dipilih & aktif
+  if (parsed.data.lineId) {
+    const line = await prisma.line.findUnique({
+      where: { id: parsed.data.lineId },
+    });
+    if (!line || !line.isActive || line.areaId !== area.id) {
+      return { error: "Line tidak sesuai dengan area yang dipilih" };
+    }
   }
+
+  const saved = await savePhotos(formData, true);
+  if (saved.error) return { error: "Foto kondisi temuan wajib dilampirkan" };
 
   const finding = await prisma.$transaction(async (tx) => {
     const number = await nextFindingNumber(tx, "SAFETY_REPORT");
-    const f = await tx.finding.create({
+    return tx.finding.create({
       data: {
         number,
         source: "SAFETY_REPORT",
@@ -103,7 +122,7 @@ export async function createSafetyReport(
         lineId: parsed.data.lineId || null,
         reporterId: user.id,
         photos: {
-          create: paths.map((filePath) => ({
+          create: saved.paths!.map((filePath) => ({
             type: "BEFORE" as const,
             filePath,
             uploadedById: user.id,
@@ -114,7 +133,6 @@ export async function createSafetyReport(
         },
       },
     });
-    return f;
   });
 
   const supervisorIds = await departmentSupervisors(area.departmentId);
@@ -148,11 +166,13 @@ export async function assignPic(
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
+  const dueDate = parseDateOnly(parsed.data.dueDate);
+  if (dueDate < wibToday()) {
+    return { error: "Target selesai tidak boleh tanggal yang sudah lewat" };
+  }
+
   const finding = await findingForWorkflow(parsed.data.findingId);
   if (!finding) return { error: "Temuan tidak ditemukan" };
-  if (!canTransition(user, finding, "IN_PROGRESS")) {
-    return { error: "Kamu tidak berwenang menugaskan temuan ini" };
-  }
   // PIC area hanya boleh menugaskan dirinya sendiri
   if (user.role === "PIC_AREA" && parsed.data.picId !== user.id) {
     return { error: "PIC area hanya bisa mengambil tugas untuk diri sendiri" };
@@ -163,25 +183,11 @@ export async function assignPic(
   });
   if (!pic || !pic.isActive) return { error: "PIC tidak ditemukan" };
 
-  await prisma.$transaction([
-    prisma.finding.update({
-      where: { id: finding.id },
-      data: {
-        status: "IN_PROGRESS",
-        picId: pic.id,
-        dueDate: new Date(parsed.data.dueDate + "T00:00:00+07:00"),
-      },
-    }),
-    prisma.findingStatusHistory.create({
-      data: {
-        findingId: finding.id,
-        fromStatus: "OPEN",
-        toStatus: "IN_PROGRESS",
-        actorId: user.id,
-        note: `PIC: ${pic.name}, target ${parsed.data.dueDate}`,
-      },
-    }),
-  ]);
+  const ok = await transitionFinding(user, finding, "IN_PROGRESS", {
+    note: `PIC: ${pic.name}, target ${toDateStr(dueDate)}`,
+    data: { picId: pic.id, dueDate },
+  });
+  if (!ok) return { error: "Kamu tidak berwenang menugaskan temuan ini" };
 
   await notify(
     [pic.id, finding.reporterId],
@@ -210,50 +216,28 @@ export async function completeFix(
 
   const finding = await findingForWorkflow(parsed.data.findingId);
   if (!finding) return { error: "Temuan tidak ditemukan" };
-  if (!canTransition(user, finding, "PENDING_VERIFICATION")) {
+
+  const saved = await savePhotos(formData, true);
+  if (saved.error) {
+    return { error: "Foto kondisi sesudah perbaikan wajib dilampirkan" };
+  }
+
+  const ok = await transitionFinding(user, finding, "PENDING_VERIFICATION", {
+    note: parsed.data.actionNote.slice(0, 200),
+    data: { actionNote: parsed.data.actionNote },
+  });
+  if (!ok) {
     return { error: "Hanya PIC yang ditugaskan yang bisa menyelesaikan perbaikan" };
   }
 
-  const photos = formData
-    .getAll("photos")
-    .filter((f): f is File => f instanceof File && f.size > 0);
-  if (photos.length === 0) {
-    return { error: "Foto kondisi sesudah perbaikan wajib dilampirkan" };
-  }
-  if (photos.length > 4) return { error: "Maksimal 4 foto" };
-
-  let paths: string[];
-  try {
-    paths = await Promise.all(photos.map((p) => savePhoto(p)));
-  } catch (e) {
-    return { error: e instanceof Error ? e.message : "Gagal menyimpan foto" };
-  }
-
-  await prisma.$transaction([
-    prisma.finding.update({
-      where: { id: finding.id },
-      data: {
-        status: "PENDING_VERIFICATION",
-        actionNote: parsed.data.actionNote,
-        photos: {
-          create: paths.map((filePath) => ({
-            type: "AFTER" as const,
-            filePath,
-            uploadedById: user.id,
-          })),
-        },
-      },
-    }),
-    prisma.findingStatusHistory.create({
-      data: {
-        findingId: finding.id,
-        fromStatus: "IN_PROGRESS",
-        toStatus: "PENDING_VERIFICATION",
-        actorId: user.id,
-        note: parsed.data.actionNote.slice(0, 200),
-      },
-    }),
-  ]);
+  await prisma.findingPhoto.createMany({
+    data: saved.paths!.map((filePath) => ({
+      findingId: finding.id,
+      type: "AFTER" as const,
+      filePath,
+      uploadedById: user.id,
+    })),
+  });
 
   const area = await prisma.area.findUnique({ where: { id: finding.areaId } });
   const supervisorIds = area
@@ -286,7 +270,12 @@ export async function verifyClose(
 
   const finding = await findingForWorkflow(parsed.data.findingId);
   if (!finding) return { error: "Temuan tidak ditemukan" };
-  if (!canTransition(user, finding, "CLOSED")) {
+
+  const ok = await transitionFinding(user, finding, "CLOSED", {
+    note: parsed.data.note || "Verifikasi diterima",
+    data: { verifiedById: user.id, closedAt: new Date() },
+  });
+  if (!ok) {
     return {
       error:
         finding.picId === user.id
@@ -294,22 +283,6 @@ export async function verifyClose(
           : "Kamu tidak berwenang memverifikasi temuan ini",
     };
   }
-
-  await prisma.$transaction([
-    prisma.finding.update({
-      where: { id: finding.id },
-      data: { status: "CLOSED", verifiedById: user.id, closedAt: new Date() },
-    }),
-    prisma.findingStatusHistory.create({
-      data: {
-        findingId: finding.id,
-        fromStatus: finding.status,
-        toStatus: "CLOSED",
-        actorId: user.id,
-        note: parsed.data.note || "Verifikasi diterima",
-      },
-    }),
-  ]);
 
   await notify(
     [finding.reporterId, finding.picId],
@@ -338,25 +311,15 @@ export async function rejectVerification(
 
   const finding = await findingForWorkflow(parsed.data.findingId);
   if (!finding) return { error: "Temuan tidak ditemukan" };
-  if (finding.status !== "PENDING_VERIFICATION" || !canTransition(user, finding, "IN_PROGRESS")) {
-    return { error: "Kamu tidak berwenang menolak verifikasi ini" };
+  if (finding.status !== "PENDING_VERIFICATION") {
+    return { error: "Temuan tidak sedang menunggu verifikasi" };
   }
 
-  await prisma.$transaction([
-    prisma.finding.update({
-      where: { id: finding.id },
-      data: { status: "IN_PROGRESS", rejectionNote: parsed.data.note },
-    }),
-    prisma.findingStatusHistory.create({
-      data: {
-        findingId: finding.id,
-        fromStatus: "PENDING_VERIFICATION",
-        toStatus: "IN_PROGRESS",
-        actorId: user.id,
-        note: `Ditolak: ${parsed.data.note}`,
-      },
-    }),
-  ]);
+  const ok = await transitionFinding(user, finding, "IN_PROGRESS", {
+    note: `Ditolak: ${parsed.data.note}`,
+    data: { rejectionNote: parsed.data.note },
+  });
+  if (!ok) return { error: "Kamu tidak berwenang menolak verifikasi ini" };
 
   await notify(
     [finding.picId],
@@ -385,25 +348,20 @@ export async function invalidateFinding(
 
   const finding = await findingForWorkflow(parsed.data.findingId);
   if (!finding) return { error: "Temuan tidak ditemukan" };
-  if (finding.status !== "OPEN" || !canTransition(user, finding, "CLOSED")) {
-    return { error: "Kamu tidak berwenang menutup temuan ini" };
+  if (finding.status !== "OPEN") {
+    return { error: "Hanya temuan berstatus Terbuka yang bisa ditutup tidak valid" };
   }
 
-  await prisma.$transaction([
-    prisma.finding.update({
-      where: { id: finding.id },
-      data: { status: "CLOSED", verifiedById: user.id, closedAt: new Date() },
-    }),
-    prisma.findingStatusHistory.create({
-      data: {
-        findingId: finding.id,
-        fromStatus: "OPEN",
-        toStatus: "CLOSED",
-        actorId: user.id,
-        note: `Ditutup (tidak valid): ${parsed.data.note}`,
-      },
-    }),
-  ]);
+  const ok = await transitionFinding(user, finding, "CLOSED", {
+    note: `Ditutup (tidak valid): ${parsed.data.note}`,
+    data: {
+      isValid: false,
+      verifiedById: user.id,
+      closedAt: new Date(),
+      rejectionNote: parsed.data.note,
+    },
+  });
+  if (!ok) return { error: "Kamu tidak berwenang menutup temuan ini" };
 
   await notify(
     [finding.reporterId],

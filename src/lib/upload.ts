@@ -6,11 +6,7 @@ import crypto from "crypto";
 const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || "./uploads");
 
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
-export const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB (sudah dikompres di client)
-
-export function uploadRoot() {
-  return UPLOAD_DIR;
-}
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB (sudah dikompres di client)
 
 /** Simpan foto ke disk, return path relatif (disimpan di DB). */
 export async function savePhoto(file: File): Promise<string> {

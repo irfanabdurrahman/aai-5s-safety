@@ -3,29 +3,9 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { FindingCard } from "@/components/findings/FindingCard";
+import { FINDING_CARD_SELECT } from "@/components/findings/finding-card-select";
 import { IconAlert, IconCamera, IconChevronRight } from "@/components/icons";
 import { canVerify } from "@/lib/rbac";
-
-const CARD_SELECT = {
-  id: true,
-  number: true,
-  source: true,
-  status: true,
-  riskLevel: true,
-  safetyCategory: true,
-  pillar: true,
-  description: true,
-  dueDate: true,
-  createdAt: true,
-  area: { select: { name: true, department: { select: { code: true } } } },
-  reporter: { select: { name: true } },
-  pic: { select: { name: true } },
-  photos: {
-    where: { type: "BEFORE" as const },
-    take: 1,
-    select: { filePath: true },
-  },
-} as const;
 
 export default async function BerandaPage() {
   const user = await requireUser();
@@ -61,7 +41,7 @@ export default async function BerandaPage() {
       prisma.finding.findMany({
         orderBy: { createdAt: "desc" },
         take: 6,
-        select: CARD_SELECT,
+        select: FINDING_CARD_SELECT,
       }),
     ]);
 

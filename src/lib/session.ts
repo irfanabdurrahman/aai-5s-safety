@@ -9,6 +9,7 @@ export type SessionPayload = {
   npk: string;
   name: string;
   role: Role;
+  mcp?: boolean; // mustChangePassword — dipaksa ganti di /profil oleh proxy
 };
 
 function secretKey() {
@@ -37,6 +38,7 @@ export async function verifySession(
       npk: String(payload.npk ?? ""),
       name: String(payload.name ?? ""),
       role: payload.role as Role,
+      mcp: payload.mcp === true,
     };
   } catch {
     return null;

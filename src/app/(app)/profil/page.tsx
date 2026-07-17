@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ROLE_LABELS } from "@/lib/rbac";
+import { Initials } from "@/components/ui/Initials";
 import { ChangePasswordForm } from "./ChangePasswordForm";
 import { LogoutButton } from "./LogoutButton";
 
@@ -22,14 +23,7 @@ export default async function ProfilPage() {
 
       <Card>
         <CardBody className="flex items-center gap-4">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand text-lg font-extrabold text-white">
-            {user.name
-              .split(" ")
-              .slice(0, 2)
-              .map((s) => s[0])
-              .join("")
-              .toUpperCase()}
-          </span>
+          <Initials name={user.name} size="lg" tone="solid" />
           <div className="min-w-0">
             <p className="truncate text-base font-bold">{user.name}</p>
             <p className="text-sm text-muted">NPK {user.npk}</p>

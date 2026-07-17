@@ -45,8 +45,11 @@ export async function login(
     npk: user.npk,
     name: user.name,
     role: user.role,
+    mcp: user.mustChangePassword,
   });
 
+  // Wajib ganti password default sebelum ke mana-mana
+  if (user.mustChangePassword) redirect("/profil");
   const dest = String(formData.get("return") || "/");
   redirect(dest.startsWith("/") && !dest.startsWith("//") ? dest : "/");
 }
@@ -90,6 +93,14 @@ export async function changePassword(
       passwordHash: await bcrypt.hash(parsed.data.next, 10),
       mustChangePassword: false,
     },
+  });
+  // Terbitkan ulang sesi tanpa flag wajib-ganti-password
+  await createSessionCookie({
+    sub: user.id,
+    npk: user.npk,
+    name: user.name,
+    role: user.role,
+    mcp: false,
   });
   return { ok: true };
 }

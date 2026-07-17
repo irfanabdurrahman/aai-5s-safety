@@ -258,6 +258,7 @@ model Finding {
   areaId         String
   lineId         String?
   status         FindingStatus   @default(OPEN)
+  isValid        Boolean         @default(true) // false = ditutup sebagai tidak valid/duplikat
   picId          String?
   dueDate        DateTime?       @db.Date
   actionNote     String?

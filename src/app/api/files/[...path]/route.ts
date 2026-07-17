@@ -1,8 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createReadStream, existsSync, statSync } from "fs";
 import { Readable } from "stream";
-import { verifySession } from "@/lib/session";
-import { SESSION_COOKIE } from "@/lib/session";
+import { apiUser, isTvAuthorized } from "@/lib/api-auth";
 import { resolveUploadPath } from "@/lib/upload";
 
 const MIME: Record<string, string> = {
@@ -16,13 +15,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
-  // Foto hanya untuk user login — kecuali TV kiosk dengan token valid
-  const session = await verifySession(
-    request.cookies.get(SESSION_COOKIE)?.value,
-  );
-  const tvToken = request.nextUrl.searchParams.get("token");
-  const tvOk = !!process.env.TV_TOKEN && tvToken === process.env.TV_TOKEN;
-  if (!session && !tvOk) {
+  // Foto hanya untuk user aktif — kecuali TV kiosk dengan token valid
+  const user = await apiUser(request);
+  const tvOk = isTvAuthorized(request.nextUrl.searchParams.get("token"));
+  if (!user && !tvOk) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

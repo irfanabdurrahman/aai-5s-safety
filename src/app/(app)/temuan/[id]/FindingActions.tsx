@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/Input";
 import { PhotoCapture } from "@/components/findings/PhotoCapture";
 import { RISK_DUE_DAYS } from "@/lib/labels";
+import { addDays, toDateStr, wibToday } from "@/lib/dates";
 import type { RiskLevel, Role } from "@/generated/prisma/enums";
 
 type Candidate = { id: string; name: string; role: Role };
@@ -35,9 +36,8 @@ type Can = {
 
 function defaultDueDate(risk: RiskLevel | null): string {
   const days = risk ? RISK_DUE_DAYS[risk] : 7;
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  const d = addDays(wibToday(), days);
+  return toDateStr(d);
 }
 
 export function FindingActions({

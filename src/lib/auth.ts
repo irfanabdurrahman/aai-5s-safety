@@ -18,7 +18,10 @@ export async function createSessionCookie(payload: SessionPayload) {
   store.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    // INSECURE_COOKIES=1 hanya untuk QA internal lewat HTTP polos
+    secure:
+      process.env.NODE_ENV === "production" &&
+      process.env.INSECURE_COOKIES !== "1",
     maxAge: SESSION_MAX_AGE,
     path: "/",
   });

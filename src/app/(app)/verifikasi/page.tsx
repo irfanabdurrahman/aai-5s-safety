@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { FindingCard } from "@/components/findings/FindingCard";
+import { FINDING_CARD_SELECT_AFTER } from "@/components/findings/finding-card-select";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const metadata: Metadata = { title: "Verifikasi" };
@@ -20,26 +21,7 @@ export default async function VerifikasiPage() {
   const findings = await prisma.finding.findMany({
     where,
     orderBy: { updatedAt: "asc" },
-    select: {
-      id: true,
-      number: true,
-      source: true,
-      status: true,
-      riskLevel: true,
-      safetyCategory: true,
-      pillar: true,
-      description: true,
-      dueDate: true,
-      createdAt: true,
-      area: { select: { name: true, department: { select: { code: true } } } },
-      reporter: { select: { name: true } },
-      pic: { select: { name: true } },
-      photos: {
-        where: { type: "AFTER" },
-        take: 1,
-        select: { filePath: true },
-      },
-    },
+    select: FINDING_CARD_SELECT_AFTER,
   });
 
   return (

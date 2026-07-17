@@ -1,15 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isTvAuthorized } from "@/lib/api-auth";
 import { getKpis, getAreaScores } from "@/lib/kpi";
 import { getReporterLeaderboard } from "@/lib/leaderboard";
 
 export async function GET(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get("token");
-  if (!process.env.TV_TOKEN || token !== process.env.TV_TOKEN) {
+  if (!isTvAuthorized(request.nextUrl.searchParams.get("token"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [kpis, areaScores, reporters, recent] = await Promise.all([
+  const [kpis, areaScores, reporters, recent, lastCritical] = await Promise.all([
     getKpis(),
     getAreaScores(),
     getReporterLeaderboard("month"),
@@ -32,14 +32,14 @@ export async function GET(request: NextRequest) {
         },
       },
     }),
+    // Hari tanpa temuan kritis: hari sejak temuan CRITICAL terakhir
+    prisma.finding.findFirst({
+      where: { riskLevel: "CRITICAL" },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    }),
   ]);
 
-  // Hari tanpa kecelakaan proxy: hari sejak temuan CRITICAL terakhir
-  const lastCritical = await prisma.finding.findFirst({
-    where: { riskLevel: "CRITICAL" },
-    orderBy: { createdAt: "desc" },
-    select: { createdAt: true },
-  });
   const daysSinceCritical = lastCritical
     ? Math.floor((Date.now() - lastCritical.createdAt.getTime()) / 86400000)
     : null;

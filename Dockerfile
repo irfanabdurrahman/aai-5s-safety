@@ -23,6 +23,8 @@ WORKDIR /app
 RUN apt-get update -qq && apt-get install -y -qq openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 ENV UPLOAD_DIR=/app/uploads
+# Standalone server bind ke $HOSTNAME — wajib 0.0.0.0 agar reachable antar container
+ENV HOSTNAME=0.0.0.0
 
 # Prisma CLI untuk migrate deploy saat start
 COPY --from=build /app/prisma ./prisma

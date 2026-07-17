@@ -1,14 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifySession, SESSION_COOKIE } from "@/lib/session";
+import { apiUser } from "@/lib/api-auth";
 import { toCsv } from "@/lib/csv";
 import { PILLAR_META, PILLAR_ORDER } from "@/lib/labels";
 
 export async function GET(request: NextRequest) {
-  const session = await verifySession(
-    request.cookies.get(SESSION_COOKIE)?.value,
-  );
-  if (!session || (session.role !== "ADMIN" && session.role !== "SUPERVISOR")) {
+  const user = await apiUser(request, ["ADMIN", "SUPERVISOR"]);
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

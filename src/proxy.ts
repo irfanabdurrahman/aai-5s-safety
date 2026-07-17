@@ -23,6 +23,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Password default wajib diganti dulu — kunci semua halaman selain /profil
+  if (session.mcp && pathname !== "/profil") {
+    return NextResponse.redirect(new URL("/profil", request.url));
+  }
+
   const rule = ROUTE_ROLES.find(
     (r) => pathname === r.prefix || pathname.startsWith(r.prefix + "/"),
   );

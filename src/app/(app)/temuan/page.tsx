@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import type { FindingStatus } from "@/generated/prisma/enums";
 import { FindingCard } from "@/components/findings/FindingCard";
+import { FINDING_CARD_SELECT } from "@/components/findings/finding-card-select";
 import { Input, Select } from "@/components/ui/Input";
 import { STATUS_META } from "@/lib/labels";
 import { IconSearch } from "@/components/icons";
@@ -61,26 +62,7 @@ export default async function TemuanPage({
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
-      select: {
-        id: true,
-        number: true,
-        source: true,
-        status: true,
-        riskLevel: true,
-        safetyCategory: true,
-        pillar: true,
-        description: true,
-        dueDate: true,
-        createdAt: true,
-        area: { select: { name: true, department: { select: { code: true } } } },
-        reporter: { select: { name: true } },
-        pic: { select: { name: true } },
-        photos: {
-          where: { type: "BEFORE" },
-          take: 1,
-          select: { filePath: true },
-        },
-      },
+      select: FINDING_CARD_SELECT,
     }),
     prisma.finding.count({ where }),
     prisma.area.findMany({

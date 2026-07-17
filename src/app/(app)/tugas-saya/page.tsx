@@ -1,30 +1,15 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { FindingCard, type FindingCardData } from "@/components/findings/FindingCard";
+import {
+  FindingCard,
+  type FindingCardData,
+} from "@/components/findings/FindingCard";
+import { FINDING_CARD_SELECT } from "@/components/findings/finding-card-select";
+import { isOverdue } from "@/lib/labels";
+import { wibToday, addDays } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "Tugas Saya" };
-
-const CARD_SELECT = {
-  id: true,
-  number: true,
-  source: true,
-  status: true,
-  riskLevel: true,
-  safetyCategory: true,
-  pillar: true,
-  description: true,
-  dueDate: true,
-  createdAt: true,
-  area: { select: { name: true, department: { select: { code: true } } } },
-  reporter: { select: { name: true } },
-  pic: { select: { name: true } },
-  photos: {
-    where: { type: "BEFORE" as const },
-    take: 1,
-    select: { filePath: true },
-  },
-} as const;
 
 function Section({
   title,
@@ -61,39 +46,38 @@ function Section({
 
 export default async function TugasSayaPage() {
   const user = await requireUser(["PIC_AREA", "SUPERVISOR", "ADMIN"]);
+  const soon = addDays(wibToday(), 3);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const soon = new Date(today);
-  soon.setDate(soon.getDate() + 3);
-
-  const tasks = await prisma.finding.findMany({
-    where: { picId: user.id, status: { in: ["IN_PROGRESS", "PENDING_VERIFICATION"] } },
-    orderBy: [{ dueDate: "asc" }, { createdAt: "asc" }],
-    select: CARD_SELECT,
-  });
-
-  // Temuan OPEN di area yang PIC-nya user ini (bisa "Ambil Tugas")
-  const openInMyAreas =
+  const [tasks, openInMyAreas] = await Promise.all([
+    prisma.finding.findMany({
+      where: {
+        picId: user.id,
+        status: { in: ["IN_PROGRESS", "PENDING_VERIFICATION"] },
+      },
+      orderBy: [{ dueDate: "asc" }, { createdAt: "asc" }],
+      select: FINDING_CARD_SELECT,
+    }),
+    // Temuan OPEN di area yang PIC-nya user ini (bisa "Ambil Tugas")
     user.role === "PIC_AREA"
-      ? await prisma.finding.findMany({
+      ? prisma.finding.findMany({
           where: { status: "OPEN", area: { picUserId: user.id } },
           orderBy: { createdAt: "desc" },
-          select: CARD_SELECT,
+          select: FINDING_CARD_SELECT,
         })
-      : [];
+      : Promise.resolve([]),
+  ]);
 
-  const overdue = tasks.filter(
-    (f) => f.dueDate && f.dueDate < today && f.status !== "PENDING_VERIFICATION",
+  // Satu definisi overdue (isOverdue); PENDING_VERIFICATION dikelompokkan
+  // terpisah karena bolanya di verifikator, bukan PIC.
+  const waiting = tasks.filter((f) => f.status === "PENDING_VERIFICATION");
+  const active = tasks.filter((f) => f.status === "IN_PROGRESS");
+  const overdue = active.filter((f) => isOverdue(f));
+  const dueSoon = active.filter(
+    (f) => !isOverdue(f) && f.dueDate && f.dueDate <= soon,
   );
-  const dueSoon = tasks.filter(
-    (f) =>
-      f.dueDate &&
-      f.dueDate >= today &&
-      f.dueDate <= soon &&
-      f.status !== "PENDING_VERIFICATION",
+  const rest = active.filter(
+    (f) => !overdue.includes(f) && !dueSoon.includes(f),
   );
-  const rest = tasks.filter((f) => !overdue.includes(f) && !dueSoon.includes(f));
 
   const empty = !tasks.length && !openInMyAreas.length;
 
@@ -113,9 +97,17 @@ export default async function TugasSayaPage() {
       ) : (
         <>
           <Section title="🔴 Terlambat" tone="danger" items={overdue} />
-          <Section title="🟠 Segera jatuh tempo (≤3 hari)" tone="warn" items={dueSoon} />
-          <Section title="Sedang dikerjakan / menunggu verifikasi" items={rest} />
-          <Section title="🆕 Temuan baru di area kamu — bisa diambil" items={openInMyAreas} />
+          <Section
+            title="🟠 Segera jatuh tempo (≤3 hari)"
+            tone="warn"
+            items={dueSoon}
+          />
+          <Section title="Sedang dikerjakan" items={rest} />
+          <Section title="Menunggu verifikasi supervisor" items={waiting} />
+          <Section
+            title="🆕 Temuan baru di area kamu — bisa diambil"
+            items={openInMyAreas}
+          />
         </>
       )}
     </div>

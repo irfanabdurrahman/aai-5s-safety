@@ -19,6 +19,7 @@ import {
   formatDate,
   formatDateTime,
 } from "@/lib/labels";
+import { Initials } from "@/components/ui/Initials";
 import { FindingActions } from "./FindingActions";
 import { CommentForm } from "./CommentForm";
 import { PhotoGallery } from "./PhotoGallery";
@@ -288,14 +289,7 @@ export default async function TemuanDetailPage({
         <CardBody className="space-y-4">
           {finding.comments.map((c) => (
             <div key={c.id} className="flex gap-2.5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[10px] font-extrabold text-brand">
-                {c.user.name
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((s) => s[0])
-                  .join("")
-                  .toUpperCase()}
-              </span>
+              <Initials name={c.user.name} size="sm" />
               <div className="min-w-0 flex-1 rounded-xl bg-background px-3.5 py-2.5">
                 <p className="text-xs font-bold">
                   {c.user.name}

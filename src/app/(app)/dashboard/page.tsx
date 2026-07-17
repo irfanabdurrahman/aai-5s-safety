@@ -11,7 +11,7 @@ import { getDepartmentRanking } from "@/lib/leaderboard";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { TrendChart } from "@/components/dashboard/TrendChart";
-import { STATUS_META, formatDate } from "@/lib/labels";
+import { STATUS_META, formatDate, scoreBand } from "@/lib/labels";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -153,13 +153,7 @@ export default async function DashboardPage() {
                     </span>
                     <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-background">
                       <div
-                        className={`h-full rounded-full ${
-                          a.score! >= 80
-                            ? "bg-ok"
-                            : a.score! >= 60
-                              ? "bg-warn"
-                              : "bg-danger"
-                        }`}
+                        className={`h-full rounded-full ${scoreBand(a.score!).bg}`}
                         style={{ width: `${a.score}%` }}
                       />
                     </div>
