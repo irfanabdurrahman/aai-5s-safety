@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AAI 5S & Safety
 
-## Getting Started
+Aplikasi **5S & Safety Finding** untuk PT Akebono Brake Astra Indonesia — lapor
+temuan bahaya dari HP, audit patrol 5S dengan checklist & skor, dan tindak lanjut
+sampai closed dengan verifikasi supervisor.
 
-First, run the development server:
+## Fitur
+
+- **Lapor Temuan Safety** — foto → kategori (kondisi/tindakan tidak aman, near miss)
+  → tingkat risiko → kirim. Kurang dari 1 menit dari HP.
+- **Audit 5S** — checklist Ringkas·Rapi·Resik·Rawat·Rajin (25 kriteria, skor 0–4),
+  autosave per kriteria, skor ≤2 bisa langsung dijadikan temuan. Jadwal mingguan/bulanan otomatis.
+- **Workflow tindak lanjut** — Terbuka → Dikerjakan (PIC + target) → Verifikasi →
+  Selesai. Foto before/after wajib, verifikator ≠ PIC, riwayat lengkap.
+- **Eskalasi otomatis** — notifikasi H-1, terlambat, dan eskalasi ≥3 hari ke admin.
+- **Dashboard manajemen** — KPI, tren 8 minggu, skor 5S per area, peringkat departemen.
+- **Leaderboard** pelapor teraktif + **TV mode** kiosk untuk layar pabrik.
+- **Export CSV** temuan & audit untuk laporan P2K3.
+
+## Stack
+
+Next.js 16 (App Router, Server Actions) · Tailwind CSS 4 · PostgreSQL + Prisma 7 ·
+JWT session (jose) + bcrypt · Docker.
+
+## Menjalankan (dev)
 
 ```bash
+cp .env.example .env   # isi DATABASE_URL, SESSION_SECRET, dll
+npm install
+npx prisma migrate dev
+npx tsx prisma/seed.ts        # master data + akun dasar
+npx tsx prisma/seed-demo.ts   # opsional: data demo historis
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Akun demo (password: `akebono123`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| NPK | Nama | Role |
+|---|---|---|
+| 10001 | Budi Santoso | Admin EHS |
+| 20001 | Rina Kartika | Supervisor (Disc) |
+| 30001 | Agus Wibowo | PIC Area (Disc) |
+| 40001 | Dedi Kurniawan | Karyawan |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Role
 
-## Learn More
+- **Karyawan** — lapor temuan, lihat feed & leaderboard.
+- **PIC Area** — kerjakan perbaikan (ambil tugas, foto after, kirim verifikasi).
+- **Supervisor** — tugaskan PIC, verifikasi/tolak perbaikan, dashboard.
+- **Admin EHS** — semua di atas + master data, checklist, jadwal audit, export.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Docker multi-stage (`Dockerfile`), `prisma migrate deploy` jalan otomatis saat start.
+Mount volume persisten ke `/app/uploads` untuk foto. Env wajib: `DATABASE_URL`,
+`SESSION_SECRET`, `CRON_SECRET`, `TV_TOKEN`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Job harian (notifikasi due/overdue + materialisasi audit terjadwal) berjalan
+otomatis jam 06:00 WIB, atau manual:
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+curl -X POST -H "x-cron-secret: $CRON_SECRET" https://<host>/api/cron/run
+```

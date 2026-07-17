@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum Role {
+  KARYAWAN
+  PIC_AREA
+  SUPERVISOR
+  ADMIN
+}
+
+enum FindingSource {
+  SAFETY_REPORT
+  AUDIT_5S
+}
+
+enum SafetyCategory {
+  UNSAFE_CONDITION
+  UNSAFE_ACT
+  NEAR_MISS
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum FiveSPillar {
+  SEIRI
+  SEITON
+  SEISO
+  SEIKETSU
+  SHITSUKE
+}
+
+enum FindingStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING_VERIFICATION
+  CLOSED
+}
+
+enum AuditStatus {
+  SCHEDULED
+  IN_PROGRESS
+  SUBMITTED
+}
+
+enum ScheduleFrequency {
+  WEEKLY
+  MONTHLY
+  ONCE
+}
+
+enum PhotoType {
+  BEFORE
+  AFTER
+}
+
+enum NotificationType {
+  FINDING_ASSIGNED
+  FINDING_DUE_SOON
+  FINDING_OVERDUE
+  FINDING_ESCALATED
+  FINDING_SUBMITTED_FOR_VERIFICATION
+  FINDING_VERIFIED_CLOSED
+  FINDING_REJECTED
+  FINDING_INVALIDATED
+  NEW_COMMENT
+  AUDIT_DUE
+}
+
+// ============================================================
+// Master data
+// ============================================================
+
+model Department {
+  id       String  @id @default(cuid())
+  code     String  @unique
+  name     String
+  isActive Boolean @default(true)
+
+  areas Area[]
+  users User[]
+}
+
+model Area {
+  id           String  @id @default(cuid())
+  code         String  @unique
+  name         String
+  departmentId String
+  picUserId    String?
+  isActive     Boolean @default(true)
+
+  department Department      @relation(fields: [departmentId], references: [id])
+  picUser    User?           @relation("AreaPic", fields: [picUserId], references: [id])
+  lines      Line[]
+  audits     Audit[]
+  schedules  AuditSchedule[]
+  findings   Finding[]
+
+  @@index([departmentId])
+}
+
+model Line {
+  id       String  @id @default(cuid())
+  name     String
+  areaId   String
+  isActive Boolean @default(true)
+
+  area     Area      @relation(fields: [areaId], references: [id])
+  findings Finding[]
+
+  @@index([areaId])
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  npk                String   @unique
+  name               String
+  passwordHash       String
+  role               Role     @default(KARYAWAN)
+  departmentId       String?
+  isActive           Boolean  @default(true)
+  mustChangePassword Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  department       Department?            @relation(fields: [departmentId], references: [id])
+  picAreas         Area[]                 @relation("AreaPic")
+  reportedFindings Finding[]              @relation("Reporter")
+  assignedFindings Finding[]              @relation("Pic")
+  verifiedFindings Finding[]              @relation("Verifier")
+  audits           Audit[]
+  auditSchedules   AuditSchedule[]
+  comments         Comment[]
+  notifications    Notification[]
+  statusChanges    FindingStatusHistory[]
+  uploadedPhotos   FindingPhoto[]
+
+  @@index([departmentId])
+}
+
+// ============================================================
+// 5S audit
+// ============================================================
+
+model ChecklistTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  criteria  ChecklistCriterion[]
+  audits    Audit[]
+  schedules AuditSchedule[]
+}
+
+model ChecklistCriterion {
+  id         String      @id @default(cuid())
+  templateId String
+  pillar     FiveSPillar
+  text       String
+  sortOrder  Int         @default(0)
+  isActive   Boolean     @default(true)
+
+  template ChecklistTemplate @relation(fields: [templateId], references: [id])
+  scores   AuditScore[]
+  findings Finding[]
+
+  @@index([templateId, pillar])
+}
+
+model AuditSchedule {
+  id         String            @id @default(cuid())
+  areaId     String
+  templateId String
+  auditorId  String
+  frequency  ScheduleFrequency
+  dayOfWeek  Int? // 1 = Senin ... 7 = Minggu (untuk WEEKLY)
+  dayOfMonth Int? // 1..28 (untuk MONTHLY)
+  startDate  DateTime
+  isActive   Boolean           @default(true)
+
+  area     Area              @relation(fields: [areaId], references: [id])
+  template ChecklistTemplate @relation(fields: [templateId], references: [id])
+  auditor  User              @relation(fields: [auditorId], references: [id])
+  audits   Audit[]
+
+  @@index([areaId])
+  @@index([auditorId])
+}
+
+model Audit {
+  id            String      @id @default(cuid())
+  scheduleId    String? // null = audit ad-hoc
+  areaId        String
+  templateId    String
+  auditorId     String
+  status        AuditStatus @default(SCHEDULED)
+  scheduledDate DateTime    @db.Date
+  conductedAt   DateTime?
+  submittedAt   DateTime?
+  totalScore    Float? // persen 0..100, dihitung saat submit
+  notes         String?
+
+  schedule AuditSchedule?    @relation(fields: [scheduleId], references: [id])
+  area     Area              @relation(fields: [areaId], references: [id])
+  template ChecklistTemplate @relation(fields: [templateId], references: [id])
+  auditor  User              @relation(fields: [auditorId], references: [id])
+  scores   AuditScore[]
+  findings Finding[]
+
+  @@index([areaId, scheduledDate])
+  @@index([auditorId, status])
+}
+
+model AuditScore {
+  id          String  @id @default(cuid())
+  auditId     String
+  criterionId String
+  score       Int // 0..4
+  note        String?
+
+  audit     Audit              @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  criterion ChecklistCriterion @relation(fields: [criterionId], references: [id])
+
+  @@unique([auditId, criterionId])
+}
+
+// ============================================================
+// Temuan — workflow bersama untuk Safety Report & Audit 5S
+// ============================================================
+
+model Finding {
+  id             String          @id @default(cuid())
+  number         String          @unique // SF-2026-0001 / 5S-2026-0001
+  source         FindingSource
+  auditId        String?
+  criterionId    String?
+  pillar         FiveSPillar?
+  safetyCategory SafetyCategory?
+  riskLevel      RiskLevel?
+  description    String
+  locationDetail String?
+  reporterId     String
+  areaId         String
+  lineId         String?
+  status         FindingStatus   @default(OPEN)
+  picId          String?
+  dueDate        DateTime?       @db.Date
+  actionNote     String?
+  rejectionNote  String?
+  verifiedById   String?
+  closedAt       DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  audit      Audit?              @relation(fields: [auditId], references: [id])
+  criterion  ChecklistCriterion? @relation(fields: [criterionId], references: [id])
+  reporter   User                @relation("Reporter", fields: [reporterId], references: [id])
+  area       Area                @relation(fields: [areaId], references: [id])
+  line       Line?               @relation(fields: [lineId], references: [id])
+  pic        User?               @relation("Pic", fields: [picId], references: [id])
+  verifiedBy User?               @relation("Verifier", fields: [verifiedById], references: [id])
+
+  photos        FindingPhoto[]
+  statusHistory FindingStatusHistory[]
+  comments      Comment[]
+  notifications Notification[]
+
+  @@index([status, dueDate])
+  @@index([picId, status])
+  @@index([areaId])
+  @@index([reporterId])
+  @@index([createdAt])
+}
+
+model FindingPhoto {
+  id           String    @id @default(cuid())
+  findingId    String
+  type         PhotoType
+  filePath     String
+  uploadedById String
+  createdAt    DateTime  @default(now())
+
+  finding    Finding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  uploadedBy User    @relation(fields: [uploadedById], references: [id])
+
+  @@index([findingId])
+}
+
+model FindingStatusHistory {
+  id         String         @id @default(cuid())
+  findingId  String
+  fromStatus FindingStatus?
+  toStatus   FindingStatus
+  actorId    String
+  note       String?
+  createdAt  DateTime       @default(now())
+
+  finding Finding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  actor   User    @relation(fields: [actorId], references: [id])
+
+  @@index([findingId, createdAt])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  findingId String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+
+  finding Finding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([findingId, createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  findingId String?
+  auditId   String?
+  title     String
+  body      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user    User     @relation(fields: [userId], references: [id])
+  finding Finding? @relation(fields: [findingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+}
+
+model Counter {
+  key   String @id // contoh: "SF-2026", "5S-2026"
+  value Int    @default(0)
+}
