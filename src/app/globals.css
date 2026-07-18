@@ -1,17 +1,20 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Brand tokens — PT Akebono Brake Astra Indonesia
-   Ganti dua variabel utama ini untuk re-brand seluruh app.
+   Brand tokens — selaras portal SSO PT Akebono Brake Astra Indonesia
+   (sidebar indigo-ungu, aksen hijau, tile gradient, merah untuk safety CTA)
    ============================================================ */
 :root {
-  --brand-primary: #0b3c8c; /* biru korporat */
-  --brand-primary-dark: #082c66;
-  --brand-primary-soft: #e8effc;
-  --brand-accent: #d6001c; /* merah aksen */
+  --brand-primary: #5a63c0; /* indigo portal */
+  --brand-primary-dark: #434a9e;
+  --brand-primary-deeper: #363c85;
+  --brand-primary-soft: #eef0fb;
+  --brand-accent: #d6001c; /* merah safety (logo Akebono) */
   --brand-accent-soft: #fdeaec;
+  --brand-green: #1cab5e; /* hijau portal */
+  --brand-green-soft: #e4f7ec;
 
-  --background: #f5f6fa;
+  --background: #f4f5fa;
   --surface: #ffffff;
   --foreground: #101828;
   --muted: #667085;
@@ -30,9 +33,12 @@
 @theme inline {
   --color-brand: var(--brand-primary);
   --color-brand-dark: var(--brand-primary-dark);
+  --color-brand-deeper: var(--brand-primary-deeper);
   --color-brand-soft: var(--brand-primary-soft);
   --color-accent: var(--brand-accent);
   --color-accent-soft: var(--brand-accent-soft);
+  --color-green: var(--brand-green);
+  --color-green-soft: var(--brand-green-soft);
 
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -59,6 +65,34 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ===== Tile gradient ala portal Akebono ===== */
+.tile-green {
+  background: linear-gradient(135deg, #44d98b, #17a55b);
+}
+.tile-indigo {
+  background: linear-gradient(135deg, #7b83dd, #5a63c0);
+}
+.tile-blue {
+  background: linear-gradient(135deg, #4fa8f5, #2472d8);
+}
+.tile-orange {
+  background: linear-gradient(135deg, #ffb054, #f5821f);
+}
+.tile-red {
+  background: linear-gradient(135deg, #ff5b6b, #d6001c);
+}
+.tile-teal {
+  background: linear-gradient(135deg, #3ed6c4, #12a594);
+}
+
+/* Sidebar / header gradient indigo */
+.brand-side {
+  background: linear-gradient(180deg, #636bc9 0%, #4a51a8 100%);
+}
+.brand-top {
+  background: linear-gradient(90deg, #6a72cf, #5a63c0);
+}
+
 /* Scroll halus untuk area horizontal (chips filter, tabel) */
 .scroll-x {
   overflow-x: auto;
@@ -66,4 +100,27 @@ body {
 }
 .scroll-x::-webkit-scrollbar {
   display: none;
+}
+
+/* Snap scroll untuk galeri mode HP (ala Instagram) */
+.snap-feed {
+  scroll-snap-type: y mandatory;
+}
+.snap-feed > * {
+  scroll-snap-align: start;
+}
+
+/* Animasi slide galeri TV */
+@keyframes galeri-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.galeri-slide {
+  animation: galeri-in 0.7s ease-out;
 }

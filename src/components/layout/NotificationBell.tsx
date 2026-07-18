@@ -13,7 +13,7 @@ export async function NotificationBell() {
   return (
     <Link
       href="/notifikasi"
-      className="relative flex h-9 w-9 items-center justify-center rounded-full text-muted hover:bg-background"
+      className="relative flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 lg:text-muted lg:hover:bg-background"
       aria-label={`Notifikasi${unread ? `, ${unread} belum dibaca` : ""}`}
     >
       <IconBell size={20} />

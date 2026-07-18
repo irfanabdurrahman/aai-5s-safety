@@ -17,24 +17,24 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-dvh w-full">
-      {/* Sidebar desktop */}
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-surface lg:flex">
-        <Link href="/" className="flex items-center gap-3 px-5 pb-2 pt-5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white">
+      {/* Sidebar desktop — indigo ala portal Akebono */}
+      <aside className="brand-side sticky top-0 hidden h-dvh w-64 shrink-0 flex-col text-white lg:flex">
+        <Link href="/" className="flex items-center gap-3 px-5 pb-3 pt-5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
             <IconShield size={22} />
           </span>
           <span className="leading-tight">
-            <span className="block text-sm font-extrabold text-foreground">
+            <span className="block text-sm font-extrabold">
               AAI 5S &amp; Safety
             </span>
-            <span className="block text-[11px] text-muted">
+            <span className="block text-[11px] text-white/65">
               Akebono Brake Astra Indonesia
             </span>
           </span>
         </Link>
         <Sidebar items={items} />
-        <div className="mt-auto border-t border-line p-4 text-xs text-muted">
-          <p className="font-bold text-foreground">{user.name}</p>
+        <div className="mt-auto border-t border-white/15 p-4 text-xs text-white/70">
+          <p className="font-bold text-white">{user.name}</p>
           <p>
             {user.npk} · {ROLE_LABELS[user.role]}
           </p>
@@ -42,14 +42,17 @@ export default async function AppLayout({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur lg:px-6">
+        {/* Top bar — indigo di mobile, putih di desktop */}
+        <header className="brand-top sticky top-0 z-30 flex h-14 items-center gap-3 px-4 text-white lg:bg-none lg:bg-surface lg:px-6 lg:text-foreground lg:shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
           <Link href="/" className="flex items-center gap-2 lg:hidden">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
               <IconShield size={17} />
             </span>
             <span className="text-sm font-extrabold">AAI 5S &amp; Safety</span>
           </Link>
+          <span className="hidden text-sm font-bold text-muted lg:block">
+            PT Akebono Brake Astra Indonesia
+          </span>
           <div className="flex-1" />
           <NotificationBell />
           <Link href="/profil" title={user.name}>

@@ -16,7 +16,7 @@ export default async function LoginPage({
   const { return: returnTo } = await searchParams;
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-b from-brand to-brand-dark px-5">
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-br from-[#6a72cf] via-brand to-brand-deeper px-5">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center text-white">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">

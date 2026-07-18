@@ -33,13 +33,13 @@ type TvData = {
 };
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
-  OPEN: { label: "TERBUKA", cls: "bg-red-500/20 text-red-300" },
-  IN_PROGRESS: { label: "DIKERJAKAN", cls: "bg-amber-500/20 text-amber-300" },
+  OPEN: { label: "TERBUKA", cls: "bg-red-500/25 text-red-200" },
+  IN_PROGRESS: { label: "DIKERJAKAN", cls: "bg-amber-500/25 text-amber-200" },
   PENDING_VERIFICATION: {
     label: "VERIFIKASI",
-    cls: "bg-sky-500/20 text-sky-300",
+    cls: "bg-sky-500/25 text-sky-200",
   },
-  CLOSED: { label: "SELESAI", cls: "bg-emerald-500/20 text-emerald-300" },
+  CLOSED: { label: "SELESAI", cls: "bg-emerald-500/25 text-emerald-200" },
 };
 
 function Chip({
@@ -52,11 +52,13 @@ function Chip({
   cls: string;
 }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl bg-white/[0.06] px-6 py-4">
-      <span className={`text-5xl font-extrabold tabular-nums ${cls}`}>
+    <div className="flex flex-col items-center justify-center rounded-2xl bg-white/[0.07] px-4 py-3">
+      <span
+        className={`text-[clamp(1.8rem,4vh,3.2rem)] font-extrabold leading-none tabular-nums ${cls}`}
+      >
         {value}
       </span>
-      <span className="mt-1 text-xs font-bold uppercase tracking-widest text-white/50">
+      <span className="mt-1.5 text-[clamp(0.55rem,1.2vh,0.8rem)] font-bold uppercase tracking-widest text-white/55">
         {label}
       </span>
     </div>
@@ -71,7 +73,9 @@ export function TvBoard({ token }: { token: string }) {
     let alive = true;
     const load = async () => {
       try {
-        const res = await fetch(`/api/tv-data?token=${encodeURIComponent(token)}`);
+        const res = await fetch(
+          `/api/tv-data?token=${encodeURIComponent(token)}`,
+        );
         if (res.ok && alive) setData(await res.json());
       } catch {
         /* koneksi putus — biarkan data lama tampil */
@@ -99,46 +103,59 @@ export function TvBoard({ token }: { token: string }) {
     return () => clearInterval(t);
   }, []);
 
+  function goFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(() => {});
+  }
+
   if (!data) {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-[#0a1428] text-white/60">
+      <main className="flex min-h-dvh items-center justify-center bg-[#171b46] text-white/60">
         Memuat data…
       </main>
     );
   }
 
+  const medals = ["🥇", "🥈", "🥉", "🏅", "🏅"];
+
   return (
-    <main className="flex min-h-dvh flex-col bg-[#0a1428] p-6 text-white">
+    <main className="flex h-dvh flex-col overflow-hidden bg-gradient-to-br from-[#1b2050] via-[#171b46] to-[#101334] p-[2vh] text-white">
       {/* Header */}
       <header className="flex items-center gap-4">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-2xl">
+        <span className="flex h-[5.5vh] w-[5.5vh] items-center justify-center rounded-2xl bg-white/10 text-[3vh]">
           🛡️
         </span>
-        <div className="flex-1">
-          <h1 className="text-2xl font-extrabold tracking-tight">
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-[clamp(1rem,3vh,1.9rem)] font-extrabold tracking-tight">
             5S &amp; Safety — PT Akebono Brake Astra Indonesia
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="text-[clamp(0.6rem,1.5vh,0.95rem)] text-white/50">
             Keselamatan dimulai dari kita semua
           </p>
         </div>
         {data.daysSinceCritical != null && (
-          <div className="mr-6 text-center">
-            <p className="text-4xl font-extrabold text-emerald-300 tabular-nums">
+          <div className="mr-4 text-center">
+            <p className="text-[clamp(1.5rem,4vh,3rem)] font-extrabold leading-none text-emerald-300 tabular-nums">
               {data.daysSinceCritical}
             </p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">
+            <p className="text-[clamp(0.5rem,1.1vh,0.7rem)] font-bold uppercase tracking-widest text-white/50">
               hari tanpa temuan kritis
             </p>
           </div>
         )}
-        <span className="text-4xl font-extrabold tabular-nums text-white/80">
+        <span className="text-[clamp(1.5rem,4vh,3rem)] font-extrabold tabular-nums text-white/85">
           {clock}
         </span>
+        <button
+          onClick={goFullscreen}
+          className="rounded-xl bg-white/10 px-3 py-2 text-[clamp(0.6rem,1.4vh,0.85rem)] font-bold text-white/70 hover:bg-white/20"
+        >
+          ⛶ Fullscreen
+        </button>
       </header>
 
       {/* KPI */}
-      <section className="mt-6 grid grid-cols-5 gap-4">
+      <section className="mt-[1.5vh] grid grid-cols-5 gap-[1.2vh]">
         <Chip value={data.kpis.open} label="Terbuka" cls="text-red-300" />
         <Chip
           value={data.kpis.inProgress}
@@ -147,51 +164,54 @@ export function TvBoard({ token }: { token: string }) {
         />
         <Chip
           value={data.kpis.pending}
-          label="Tunggu Verifikasi"
+          label="Verifikasi"
           cls="text-sky-300"
         />
         <Chip
           value={data.kpis.closedThisMonth}
-          label="Selesai Bulan Ini"
+          label="Selesai Bln Ini"
           cls="text-emerald-300"
         />
         <Chip value={data.kpis.overdue} label="Terlambat" cls="text-red-300" />
       </section>
 
-      <div className="mt-6 grid flex-1 grid-cols-3 gap-6">
+      {/* Konten utama — 1 layar, tanpa scroll */}
+      <div className="mt-[1.5vh] grid min-h-0 flex-1 grid-cols-3 gap-[1.5vh]">
         {/* Temuan terbaru */}
-        <section className="col-span-2">
-          <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-white/50">
+        <section className="col-span-2 flex min-h-0 flex-col">
+          <h2 className="mb-[1vh] text-[clamp(0.6rem,1.5vh,0.9rem)] font-bold uppercase tracking-widest text-white/50">
             Temuan Terbaru
           </h2>
-          <div className="space-y-2.5">
-            {data.recent.slice(0, 6).map((f) => {
+          <div className="flex min-h-0 flex-1 flex-col gap-[1.2vh]">
+            {data.recent.slice(0, 5).map((f) => {
               const s = STATUS_LABEL[f.status] ?? STATUS_LABEL.OPEN;
               return (
                 <div
                   key={f.id}
-                  className="flex items-center gap-4 rounded-2xl bg-white/[0.06] p-3"
+                  className="flex min-h-0 flex-1 items-center gap-[1.5vh] rounded-2xl bg-white/[0.07] px-[1.5vh]"
                 >
                   {f.photos[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={`/api/files/${f.photos[0].filePath}?token=${encodeURIComponent(token)}`}
                       alt=""
-                      className="h-16 w-16 rounded-xl object-cover"
+                      className="h-[80%] w-[9vh] rounded-xl object-cover"
                     />
                   ) : (
-                    <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/10 text-2xl">
+                    <span className="flex h-[80%] w-[9vh] items-center justify-center rounded-xl bg-white/10 text-[3vh]">
                       📋
                     </span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-lg font-bold">{f.description}</p>
-                    <p className="text-sm text-white/50">
+                    <p className="truncate text-[clamp(0.8rem,2.2vh,1.35rem)] font-bold">
+                      {f.description}
+                    </p>
+                    <p className="truncate text-[clamp(0.6rem,1.6vh,1rem)] text-white/50">
                       {f.number} · {f.area.name} · {f.reporter.name}
                     </p>
                   </div>
                   <span
-                    className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-extrabold ${s.cls}`}
+                    className={`shrink-0 rounded-full px-[1.3vh] py-[0.7vh] text-[clamp(0.55rem,1.4vh,0.85rem)] font-extrabold ${s.cls}`}
                   >
                     {s.label}
                   </span>
@@ -201,19 +221,48 @@ export function TvBoard({ token }: { token: string }) {
           </div>
         </section>
 
-        {/* Sidebar: skor 5S + top pelapor */}
-        <section className="space-y-6">
-          <div>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-white/50">
+        {/* Sidebar: leaderboard + skor 5S */}
+        <section className="flex min-h-0 flex-col gap-[1.5vh]">
+          <div className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white/[0.05] p-[1.5vh]">
+            <h2 className="mb-[1vh] text-[clamp(0.6rem,1.5vh,0.9rem)] font-bold uppercase tracking-widest text-emerald-300">
+              🏆 Pelapor Teraktif Bulan Ini
+            </h2>
+            <div className="flex min-h-0 flex-1 flex-col justify-around">
+              {data.reporters.slice(0, 5).map((r, i) => (
+                <div
+                  key={r.user.name + i}
+                  className="flex items-center gap-[1.2vh] rounded-xl bg-white/[0.07] px-[1.3vh] py-[0.8vh]"
+                >
+                  <span className="text-[clamp(0.9rem,2.4vh,1.5rem)]">
+                    {medals[i]}
+                  </span>
+                  <span className="flex-1 truncate text-[clamp(0.7rem,1.9vh,1.15rem)] font-bold">
+                    {r.user.name}
+                  </span>
+                  <span className="text-[clamp(0.75rem,2vh,1.2rem)] font-extrabold tabular-nums text-emerald-300">
+                    {r.count}
+                  </span>
+                </div>
+              ))}
+              {!data.reporters.length && (
+                <p className="text-center text-[1.6vh] text-white/40">
+                  Belum ada laporan bulan ini
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white/[0.05] p-[1.5vh]">
+            <h2 className="mb-[1vh] text-[clamp(0.6rem,1.5vh,0.9rem)] font-bold uppercase tracking-widest text-white/50">
               Skor 5S per Area
             </h2>
-            <div className="space-y-2">
-              {data.areaScores.map((a) => (
-                <div key={a.id} className="flex items-center gap-3">
-                  <span className="w-36 truncate text-sm font-semibold">
+            <div className="flex min-h-0 flex-1 flex-col justify-around gap-[0.6vh]">
+              {data.areaScores.slice(0, 6).map((a) => (
+                <div key={a.id} className="flex items-center gap-[1.2vh]">
+                  <span className="w-[14vh] truncate text-[clamp(0.6rem,1.6vh,1rem)] font-semibold">
                     {a.name}
                   </span>
-                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-[1.1vh] flex-1 overflow-hidden rounded-full bg-white/10">
                     <div
                       className={`h-full rounded-full ${
                         a.score >= 80
@@ -225,32 +274,8 @@ export function TvBoard({ token }: { token: string }) {
                       style={{ width: `${a.score}%` }}
                     />
                   </div>
-                  <span className="w-10 text-right text-sm font-extrabold tabular-nums">
+                  <span className="w-[5vh] text-right text-[clamp(0.65rem,1.7vh,1.05rem)] font-extrabold tabular-nums">
                     {a.score.toFixed(0)}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-white/50">
-              Pelapor Teraktif Bulan Ini
-            </h2>
-            <div className="space-y-2">
-              {data.reporters.map((r, i) => (
-                <div
-                  key={r.user.name + i}
-                  className="flex items-center gap-3 rounded-xl bg-white/[0.06] px-4 py-2.5"
-                >
-                  <span className="text-xl">
-                    {["🥇", "🥈", "🥉", "🏅", "🏅"][i]}
-                  </span>
-                  <span className="flex-1 truncate text-sm font-bold">
-                    {r.user.name}
-                  </span>
-                  <span className="text-sm font-extrabold tabular-nums text-white/70">
-                    {r.count}
                   </span>
                 </div>
               ))}
@@ -259,8 +284,12 @@ export function TvBoard({ token }: { token: string }) {
         </section>
       </div>
 
-      <footer className="mt-4 text-right text-[11px] text-white/30">
-        Pembaruan otomatis tiap 45 detik · Lapor temuan lewat aplikasi di HP kamu
+      <footer className="mt-[1vh] flex items-center justify-between text-[clamp(0.5rem,1.2vh,0.75rem)] text-white/30">
+        <span>Galeri foto temuan: /galeri?token=…</span>
+        <span>
+          Pembaruan otomatis tiap 45 detik · Lapor temuan lewat aplikasi di HP
+          kamu
+        </span>
       </footer>
     </main>
   );

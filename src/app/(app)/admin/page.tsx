@@ -28,30 +28,35 @@ export default async function AdminPage() {
     {
       href: "/admin/pengguna",
       icon: <IconUsers size={22} />,
+      cls: "tile-indigo",
       title: "Kelola Pengguna",
       desc: `${users} pengguna aktif`,
     },
     {
       href: "/admin/departemen",
       icon: <IconBuilding size={22} />,
+      cls: "tile-blue",
       title: "Departemen, Area & Line",
       desc: `${departments} departemen · ${areas} area`,
     },
     {
       href: "/admin/checklist",
       icon: <IconChecklist size={22} />,
+      cls: "tile-green",
       title: "Checklist 5S",
       desc: `${templates} template aktif`,
     },
     {
       href: "/admin/jadwal-audit",
       icon: <IconCalendar size={22} />,
+      cls: "tile-orange",
       title: "Jadwal Audit",
       desc: `${schedules} jadwal aktif`,
     },
     {
       href: "/admin/laporan",
       icon: <IconDownload size={22} />,
+      cls: "tile-teal",
       title: "Laporan & Export",
       desc: "Unduh CSV temuan, audit, leaderboard",
     },
@@ -68,7 +73,9 @@ export default async function AdminPage() {
           <Link key={it.href} href={it.href} className="block">
             <Card className="transition-shadow hover:shadow-md">
               <CardBody className="flex items-center gap-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
+                <span
+                  className={`${it.cls} flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white`}
+                >
                   {it.icon}
                 </span>
                 <div className="min-w-0 flex-1">

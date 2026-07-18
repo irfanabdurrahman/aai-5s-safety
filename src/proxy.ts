@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { ROUTE_ROLES } from "@/lib/rbac";
 
-const PUBLIC_PATHS = ["/login", "/tv", "/manifest.webmanifest"];
+// /galeri cek auth sendiri (token TV ATAU sesi login)
+const PUBLIC_PATHS = ["/login", "/tv", "/galeri", "/manifest.webmanifest"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

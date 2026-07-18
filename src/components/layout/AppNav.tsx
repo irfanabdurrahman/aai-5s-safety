@@ -27,21 +27,27 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           active ? "text-brand" : "text-muted"
         }`}
       >
-        <NavIcon icon={item.icon} />
+        <span
+          className={`flex h-7 w-11 items-center justify-center rounded-full transition-colors ${
+            active ? "bg-brand-soft" : ""
+          }`}
+        >
+          <NavIcon icon={item.icon} />
+        </span>
         {item.label}
       </Link>
     );
   };
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(16,24,40,0.06)] lg:hidden">
       <div className="mx-auto flex max-w-lg items-stretch">
         {left.map(tab)}
         <div className="relative flex flex-1 justify-center">
           <Link
             href="/lapor"
             aria-label="Lapor temuan"
-            className="absolute -top-5 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-lg shadow-accent/40 active:scale-95"
+            className="tile-red absolute -top-5 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg shadow-accent/40 active:scale-95"
           >
             <IconPlus size={26} />
           </Link>
@@ -55,7 +61,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
   );
 }
 
-/** Sidebar desktop. */
+/** Sidebar desktop — teks putih di atas indigo. */
 export function Sidebar({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
   return (
@@ -68,8 +74,8 @@ export function Sidebar({ items }: { items: NavItem[] }) {
             href={item.href}
             className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors ${
               active
-                ? "bg-brand text-white"
-                : "text-foreground/80 hover:bg-background"
+                ? "bg-white text-brand-dark shadow-sm"
+                : "text-white/85 hover:bg-white/10"
             }`}
           >
             <NavIcon icon={item.icon} size={19} />
@@ -79,7 +85,7 @@ export function Sidebar({ items }: { items: NavItem[] }) {
       })}
       <Link
         href="/lapor"
-        className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-accent px-3.5 py-3 text-sm font-bold text-white shadow-md shadow-accent/30 hover:brightness-95"
+        className="tile-red mt-3 flex items-center justify-center gap-2 rounded-xl px-3.5 py-3 text-sm font-bold text-white shadow-md shadow-accent/30 hover:brightness-105"
       >
         <IconPlus size={18} />
         Lapor Temuan

@@ -4,13 +4,21 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { FindingCard } from "@/components/findings/FindingCard";
 import { FINDING_CARD_SELECT } from "@/components/findings/finding-card-select";
-import { IconAlert, IconCamera, IconChevronRight } from "@/components/icons";
-import { canVerify } from "@/lib/rbac";
+import {
+  IconAlert,
+  IconCamera,
+  IconChevronRight,
+  IconChecklist,
+  IconClipboard,
+  IconTrophy,
+  IconChart,
+  IconCheckSquare,
+  IconTv,
+} from "@/components/icons";
+import { canVerify, canViewDashboard } from "@/lib/rbac";
 
 export default async function BerandaPage() {
   const user = await requireUser();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
   const [myOpenReports, myTasks, verifyQueue, myAudits, recent] =
     await Promise.all([
@@ -19,10 +27,7 @@ export default async function BerandaPage() {
       }),
       user.role !== "KARYAWAN"
         ? prisma.finding.count({
-            where: {
-              picId: user.id,
-              status: { in: ["IN_PROGRESS"] },
-            },
+            where: { picId: user.id, status: { in: ["IN_PROGRESS"] } },
           })
         : 0,
       canVerify(user.role)
@@ -36,7 +41,10 @@ export default async function BerandaPage() {
           })
         : 0,
       prisma.audit.count({
-        where: { auditorId: user.id, status: { in: ["SCHEDULED", "IN_PROGRESS"] } },
+        where: {
+          auditorId: user.id,
+          status: { in: ["SCHEDULED", "IN_PROGRESS"] },
+        },
       }),
       prisma.finding.findMany({
         orderBy: { createdAt: "desc" },
@@ -45,47 +53,70 @@ export default async function BerandaPage() {
       }),
     ]);
 
-  const shortcuts = [
-    myTasks > 0 && {
-      href: "/tugas-saya",
-      label: "Tugas perbaikan menunggumu",
-      count: myTasks,
-      tone: "warn" as const,
+  // Tile menu ala portal — berwarna, role-aware
+  const tiles = [
+    {
+      href: "/temuan",
+      label: "Daftar Temuan",
+      icon: <IconClipboard size={26} />,
+      cls: "tile-indigo",
+      badge: myOpenReports || undefined,
     },
-    verifyQueue > 0 && {
-      href: "/verifikasi",
-      label: "Perbaikan menunggu verifikasi",
-      count: verifyQueue,
-      tone: "info" as const,
-    },
-    myAudits > 0 && {
+    {
       href: "/audit",
-      label: "Audit 5S perlu dikerjakan",
-      count: myAudits,
-      tone: "brand" as const,
+      label: "Audit 5S",
+      icon: <IconChecklist size={26} />,
+      cls: "tile-green",
+      badge: myAudits || undefined,
     },
-    myOpenReports > 0 && {
-      href: "/temuan?q=&status=",
-      label: "Laporanmu masih diproses",
-      count: myOpenReports,
-      tone: "neutral" as const,
+    ...(myTasks > 0 || user.role === "PIC_AREA"
+      ? [
+          {
+            href: "/tugas-saya",
+            label: "Tugas Saya",
+            icon: <IconCheckSquare size={26} />,
+            cls: "tile-orange",
+            badge: myTasks || undefined,
+          },
+        ]
+      : []),
+    ...(canVerify(user.role)
+      ? [
+          {
+            href: "/verifikasi",
+            label: "Verifikasi",
+            icon: <IconAlert size={26} />,
+            cls: "tile-blue",
+            badge: verifyQueue || undefined,
+          },
+        ]
+      : []),
+    {
+      href: "/leaderboard",
+      label: "Peringkat",
+      icon: <IconTrophy size={26} />,
+      cls: "tile-teal",
     },
-  ].filter(Boolean) as {
-    href: string;
-    label: string;
-    count: number;
-    tone: "warn" | "info" | "brand" | "neutral";
-  }[];
-
-  const toneClass = {
-    warn: "bg-warn-soft text-warn",
-    info: "bg-info-soft text-info",
-    brand: "bg-brand-soft text-brand",
-    neutral: "bg-background text-muted",
-  };
+    ...(canViewDashboard(user.role)
+      ? [
+          {
+            href: "/dashboard",
+            label: "Dashboard",
+            icon: <IconChart size={26} />,
+            cls: "tile-indigo",
+          },
+          {
+            href: "/galeri",
+            label: "Galeri Temuan",
+            icon: <IconTv size={26} />,
+            cls: "tile-green",
+          },
+        ]
+      : []),
+  ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
         <h1 className="text-xl font-extrabold">
           Halo, {user.name.split(" ")[0]} 👋
@@ -97,40 +128,42 @@ export default async function BerandaPage() {
 
       {/* CTA lapor */}
       <Link href="/lapor" className="block">
-        <div className="flex items-center gap-4 rounded-2xl bg-gradient-to-r from-accent to-[#a70016] p-5 text-white shadow-lg shadow-accent/25 transition-transform active:scale-[0.99]">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+        <div className="tile-red flex items-center gap-4 rounded-2xl p-5 text-white shadow-lg shadow-accent/25 transition-transform active:scale-[0.99]">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20">
             <IconCamera size={26} />
           </span>
           <div className="flex-1">
             <p className="text-base font-extrabold">Lihat bahaya? Lapor!</p>
-            <p className="text-xs text-white/80">
+            <p className="text-xs text-white/85">
               Foto → kategori → kirim. Kurang dari 1 menit.
             </p>
           </div>
-          <IconChevronRight size={20} className="text-white/70" />
+          <IconChevronRight size={20} className="text-white/80" />
         </div>
       </Link>
 
-      {/* Shortcut tugas */}
-      {shortcuts.length > 0 && (
-        <div className="space-y-2">
-          {shortcuts.map((s) => (
-            <Link
-              key={s.href + s.label}
-              href={s.href}
-              className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
-            >
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-extrabold ${toneClass[s.tone]}`}
-              >
-                {s.count}
+      {/* Tile menu berwarna ala portal */}
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+        {tiles.map((t) => (
+          <Link
+            key={t.href + t.label}
+            href={t.href}
+            className={`${t.cls} relative flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl p-3 text-center text-white shadow-md transition-transform active:scale-95 sm:aspect-[4/3]`}
+          >
+            {t.badge !== undefined && (
+              <span className="absolute right-2 top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[10px] font-extrabold text-accent shadow">
+                {t.badge}
               </span>
-              <span className="flex-1 text-sm font-bold">{s.label}</span>
-              <IconChevronRight size={17} className="text-muted" />
-            </Link>
-          ))}
-        </div>
-      )}
+            )}
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20">
+              {t.icon}
+            </span>
+            <span className="text-[11px] font-bold leading-tight sm:text-xs">
+              {t.label}
+            </span>
+          </Link>
+        ))}
+      </div>
 
       {/* Feed terbaru */}
       <Card>
