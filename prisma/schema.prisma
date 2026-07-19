@@ -193,6 +193,7 @@ model AuditSchedule {
   dayOfMonth Int? // 1..28 (untuk MONTHLY)
   startDate  DateTime
   isActive   Boolean           @default(true)
+  createdAt  DateTime          @default(now())
 
   area     Area              @relation(fields: [areaId], references: [id])
   template ChecklistTemplate @relation(fields: [templateId], references: [id])
@@ -362,4 +363,11 @@ model LoginThrottle {
   updatedAt DateTime @updatedAt
 
   @@index([expiresAt])
+}
+
+model AccountResetBatch {
+  id          String   @id
+  releaseId   String
+  userCount   Int
+  committedAt DateTime @default(now())
 }

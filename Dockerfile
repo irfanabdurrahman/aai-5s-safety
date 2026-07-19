@@ -12,7 +12,7 @@ WORKDIR /app
 ARG APP_RELEASE_ID
 RUN test -n "$APP_RELEASE_ID" && echo "$APP_RELEASE_ID" | grep -Eq '^release-[0-9]{8}-[0-9]{6}$'
 ENV APP_RELEASE_ID=$APP_RELEASE_ID \
-    APP_SCHEMA_MARKER=20260719173000_login_throttle
+    APP_SCHEMA_MARKER=20260719193500_audit_schedule_created_at
 RUN apt-get update -qq \
   && apt-get install -y -qq --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
@@ -36,7 +36,7 @@ RUN apt-get update -qq \
 
 ENV NODE_ENV=production \
     APP_RELEASE_ID=$APP_RELEASE_ID \
-    APP_SCHEMA_MARKER=20260719173000_login_throttle \
+    APP_SCHEMA_MARKER=20260719193500_audit_schedule_created_at \
     PORT=3000 \
     HOSTNAME=0.0.0.0 \
     UPLOAD_DIR=/app/uploads

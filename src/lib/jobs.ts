@@ -2,76 +2,92 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import {
   wibToday,
-  wibDow,
-  wibDayOfMonth,
   addDays,
   toDateStr,
 } from "@/lib/dates";
 import type { NotificationType } from "@/generated/prisma/enums";
 import { cleanupExpiredLoginAttempts } from "@/lib/login-throttle";
+import {
+  effectiveScheduleStart,
+  missingOccurrencesThrough,
+} from "@/lib/schedule";
 
-/** Materialisasi audit dari jadwal untuk hari (kalender WIB) ini. */
+/** Materialize every missed occurrence through today (calendar WIB). */
 export async function materializeAudits() {
   const today = wibToday();
   const schedules = await prisma.auditSchedule.findMany({
-    where: { isActive: true, startDate: { lte: addDays(today, 1) } },
+    where: { isActive: true, startDate: { lte: today } },
+    include: {
+      audits: {
+        orderBy: { scheduledDate: "asc" },
+        select: { scheduledDate: true },
+      },
+    },
   });
 
   let created = 0;
   for (const s of schedules) {
-    const due =
-      s.frequency === "WEEKLY"
-        ? wibDow() === (s.dayOfWeek ?? 1)
-        : s.frequency === "MONTHLY"
-          ? wibDayOfMonth() === (s.dayOfMonth ?? 1)
-          : toDateStr(s.startDate) === toDateStr(today); // ONCE: bandingkan tanggal kalender
+    const effectiveStart = effectiveScheduleStart(
+      s.startDate,
+      s.createdAt,
+    );
+    const dates = missingOccurrencesThrough(
+      {
+        frequency: s.frequency,
+        startDate: effectiveStart,
+        dayOfWeek: s.dayOfWeek,
+        dayOfMonth: s.dayOfMonth,
+      },
+      s.audits.map((audit) => audit.scheduledDate),
+      today,
+    );
 
-    if (!due) continue;
-    if (s.frequency === "ONCE") {
-      // ONCE hanya sekali — skip jika sudah pernah dibuat
-      const anyAudit = await prisma.audit.findFirst({
-        where: { scheduleId: s.id },
-        select: { id: true },
-      });
-      if (anyAudit) continue;
-    }
-
-    // Unique(scheduleId, scheduledDate) + transaction lock makes materialization
-    // idempotent across replicas, including its notification side effect.
-    const inserted = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`${s.id}:${toDateStr(today)}`}))`;
-      const exists = await tx.audit.findUnique({
-        where: {
-          scheduleId_scheduledDate: {
-            scheduleId: s.id,
-            scheduledDate: today,
+    for (const scheduledDate of dates) {
+      const inserted = await prisma.$transaction(async (tx) => {
+        const dateKey = toDateStr(scheduledDate);
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`schedule-state:${s.id}`}))`;
+        const active = await tx.auditSchedule.findFirst({
+          where: { id: s.id, isActive: true },
+          select: { id: true },
+        });
+        if (!active) return false;
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`${s.id}:${dateKey}`}))`;
+        const exists = await tx.audit.findUnique({
+          where: {
+            scheduleId_scheduledDate: {
+              scheduleId: s.id,
+              scheduledDate,
+            },
           },
-        },
-        select: { id: true },
-      });
-      if (exists) return false;
+          select: { id: true },
+        });
+        if (exists) return false;
 
-      const audit = await tx.audit.create({
-        data: {
-          scheduleId: s.id,
-          areaId: s.areaId,
-          templateId: s.templateId,
-          auditorId: s.auditorId,
-          status: "SCHEDULED",
-          scheduledDate: today,
-        },
+        const audit = await tx.audit.create({
+          data: {
+            scheduleId: s.id,
+            areaId: s.areaId,
+            templateId: s.templateId,
+            auditorId: s.auditorId,
+            status: "SCHEDULED",
+            scheduledDate,
+          },
+        });
+        await tx.notification.create({
+          data: {
+            userId: s.auditorId,
+            type: "AUDIT_DUE",
+            title:
+              dateKey === toDateStr(today)
+                ? "Audit 5S hari ini — jangan lupa dikerjakan"
+                : `Audit 5S terlewat sejak ${dateKey} — segera tindak lanjuti`,
+            auditId: audit.id,
+          },
+        });
+        return true;
       });
-      await tx.notification.create({
-        data: {
-          userId: s.auditorId,
-          type: "AUDIT_DUE",
-          title: "Audit 5S hari ini — jangan lupa dikerjakan",
-          auditId: audit.id,
-        },
-      });
-      return true;
-    });
-    if (inserted) created++;
+      if (inserted) created++;
+    }
   }
   return created;
 }

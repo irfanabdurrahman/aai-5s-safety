@@ -84,11 +84,17 @@ export async function getDashboardOverview() {
       },
       select: { areaId: true, status: true },
     }),
-    prisma.area.count({ where: { isActive: true } }),
+    prisma.area.findMany({
+      where: { isActive: true },
+      select: { id: true },
+    }),
   ]);
 
   const findingsMetrics = calculateDashboardMetrics(findings, today);
-  const auditProgress = calculateAuditProgress(audits, activeAreas);
+  const auditProgress = calculateAuditProgress(
+    audits,
+    activeAreas.map((area) => area.id),
+  );
 
   return {
     ...findingsMetrics,

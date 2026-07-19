@@ -4,9 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
-import { parseDateOnly } from "@/lib/dates";
 import type { ActionState } from "@/actions/auth";
-import { scheduleSchema, firstOccurrence } from "@/lib/schedule";
+import {
+  scheduleCreationDates,
+  scheduleSchema,
+} from "@/lib/schedule";
 
 const criterionSchema = z.object({
   templateId: z.string().min(1),
@@ -86,40 +88,42 @@ export async function createSchedule(
   });
   if (!template) return { error: "Belum ada template checklist aktif" };
 
-  const startDate = parseDateOnly(parsed.data.startDate);
-  const firstDate = firstOccurrence(parsed.data);
-  const schedule = await prisma.auditSchedule.create({
-    data: {
-      areaId: parsed.data.areaId,
-      auditorId: parsed.data.auditorId,
-      templateId: template.id,
-      frequency: parsed.data.frequency,
-      dayOfWeek: parsed.data.frequency === "WEEKLY" ? parsed.data.dayOfWeek : null,
-      dayOfMonth:
-        parsed.data.frequency === "MONTHLY" ? parsed.data.dayOfMonth : null,
-      startDate,
-    },
-  });
-
-  // Buat audit pertama langsung agar auditor melihat tugasnya
-  const firstAudit = await prisma.audit.create({
-    data: {
-      scheduleId: schedule.id,
-      areaId: schedule.areaId,
-      templateId: schedule.templateId,
-      auditorId: schedule.auditorId,
-      status: "SCHEDULED",
-      scheduledDate: firstDate,
-    },
-  });
-  await prisma.notification.create({
-    data: {
-      userId: schedule.auditorId,
-      type: "AUDIT_DUE",
-      title: "Kamu dijadwalkan audit 5S",
-      body: `Mulai ${firstDate.toISOString().slice(0, 10)}`,
-      auditId: firstAudit.id,
-    },
+  const createdAt = new Date();
+  const { startDate, firstDate } = scheduleCreationDates(parsed.data, createdAt);
+  await prisma.$transaction(async (tx) => {
+    const schedule = await tx.auditSchedule.create({
+      data: {
+        areaId: parsed.data.areaId,
+        auditorId: parsed.data.auditorId,
+        templateId: template.id,
+        frequency: parsed.data.frequency,
+        dayOfWeek:
+          parsed.data.frequency === "WEEKLY" ? parsed.data.dayOfWeek : null,
+        dayOfMonth:
+          parsed.data.frequency === "MONTHLY" ? parsed.data.dayOfMonth : null,
+        startDate,
+        createdAt,
+      },
+    });
+    const firstAudit = await tx.audit.create({
+      data: {
+        scheduleId: schedule.id,
+        areaId: schedule.areaId,
+        templateId: schedule.templateId,
+        auditorId: schedule.auditorId,
+        status: "SCHEDULED",
+        scheduledDate: firstDate,
+      },
+    });
+    await tx.notification.create({
+      data: {
+        userId: schedule.auditorId,
+        type: "AUDIT_DUE",
+        title: "Kamu dijadwalkan audit 5S",
+        body: `Mulai ${firstDate.toISOString().slice(0, 10)}`,
+        auditId: firstAudit.id,
+      },
+    });
   });
 
   revalidatePath("/admin/jadwal-audit");
@@ -129,11 +133,14 @@ export async function createSchedule(
 export async function toggleSchedule(formData: FormData) {
   await requireUser(["ADMIN"]);
   const id = String(formData.get("id") || "");
-  const s = await prisma.auditSchedule.findUnique({ where: { id } });
-  if (!s) return;
-  await prisma.auditSchedule.update({
-    where: { id },
-    data: { isActive: !s.isActive },
+  await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`schedule-state:${id}`}))`;
+    const schedule = await tx.auditSchedule.findUnique({ where: { id } });
+    if (!schedule) return;
+    await tx.auditSchedule.update({
+      where: { id },
+      data: { isActive: !schedule.isActive },
+    });
   });
   revalidatePath("/admin/jadwal-audit");
 }

@@ -399,7 +399,8 @@ export const ModelName = {
   Comment: 'Comment',
   Notification: 'Notification',
   Counter: 'Counter',
-  LoginThrottle: 'LoginThrottle'
+  LoginThrottle: 'LoginThrottle',
+  AccountResetBatch: 'AccountResetBatch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "department" | "area" | "line" | "user" | "checklistTemplate" | "checklistCriterion" | "auditSchedule" | "audit" | "auditScore" | "finding" | "findingPhoto" | "findingStatusHistory" | "comment" | "notification" | "counter" | "loginThrottle"
+    modelProps: "department" | "area" | "line" | "user" | "checklistTemplate" | "checklistCriterion" | "auditSchedule" | "audit" | "auditScore" | "finding" | "findingPhoto" | "findingStatusHistory" | "comment" | "notification" | "counter" | "loginThrottle" | "accountResetBatch"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1603,6 +1604,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AccountResetBatch: {
+      payload: Prisma.$AccountResetBatchPayload<ExtArgs>
+      fields: Prisma.AccountResetBatchFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AccountResetBatchFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AccountResetBatchFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>
+        }
+        findFirst: {
+          args: Prisma.AccountResetBatchFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AccountResetBatchFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>
+        }
+        findMany: {
+          args: Prisma.AccountResetBatchFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>[]
+        }
+        create: {
+          args: Prisma.AccountResetBatchCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>
+        }
+        createMany: {
+          args: Prisma.AccountResetBatchCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AccountResetBatchCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>[]
+        }
+        delete: {
+          args: Prisma.AccountResetBatchDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>
+        }
+        update: {
+          args: Prisma.AccountResetBatchUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>
+        }
+        deleteMany: {
+          args: Prisma.AccountResetBatchDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AccountResetBatchUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AccountResetBatchUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>[]
+        }
+        upsert: {
+          args: Prisma.AccountResetBatchUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountResetBatchPayload>
+        }
+        aggregate: {
+          args: Prisma.AccountResetBatchAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAccountResetBatch>
+        }
+        groupBy: {
+          args: Prisma.AccountResetBatchGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccountResetBatchGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AccountResetBatchCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccountResetBatchCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1722,7 +1797,8 @@ export const AuditScheduleScalarFieldEnum = {
   dayOfWeek: 'dayOfWeek',
   dayOfMonth: 'dayOfMonth',
   startDate: 'startDate',
-  isActive: 'isActive'
+  isActive: 'isActive',
+  createdAt: 'createdAt'
 } as const
 
 export type AuditScheduleScalarFieldEnum = (typeof AuditScheduleScalarFieldEnum)[keyof typeof AuditScheduleScalarFieldEnum]
@@ -1853,6 +1929,16 @@ export const LoginThrottleScalarFieldEnum = {
 } as const
 
 export type LoginThrottleScalarFieldEnum = (typeof LoginThrottleScalarFieldEnum)[keyof typeof LoginThrottleScalarFieldEnum]
+
+
+export const AccountResetBatchScalarFieldEnum = {
+  id: 'id',
+  releaseId: 'releaseId',
+  userCount: 'userCount',
+  committedAt: 'committedAt'
+} as const
+
+export type AccountResetBatchScalarFieldEnum = (typeof AccountResetBatchScalarFieldEnum)[keyof typeof AccountResetBatchScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2213,6 +2299,7 @@ export type GlobalOmitConfig = {
   notification?: Prisma.NotificationOmit
   counter?: Prisma.CounterOmit
   loginThrottle?: Prisma.LoginThrottleOmit
+  accountResetBatch?: Prisma.AccountResetBatchOmit
 }
 
 /* Types for Logging */

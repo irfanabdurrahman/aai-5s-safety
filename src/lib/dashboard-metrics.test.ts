@@ -122,27 +122,47 @@ describe("calculateAuditProgress", () => {
         { areaId: "a", status: "SUBMITTED" },
         { areaId: "b", status: "SCHEDULED" },
       ],
-      4,
+      ["a", "b", "c", "d"],
     );
 
     expect(progress).toEqual({
       scheduled: 3,
       submitted: 2,
       completionRate: 67,
-      coveredAreas: 2,
+      coveredAreas: 1,
       activeAreas: 4,
-      coverageRate: 50,
+      coverageRate: 25,
     });
   });
 
   it("returns null rates when a denominator has no observations", () => {
-    expect(calculateAuditProgress([], 0)).toEqual({
+    expect(calculateAuditProgress([], [])).toEqual({
       scheduled: 0,
       submitted: 0,
       completionRate: null,
       coveredAreas: 0,
       activeAreas: 0,
       coverageRate: null,
+    });
+  });
+
+  it("counts only touched active areas and keeps the cohort at or below 100%", () => {
+    expect(
+      calculateAuditProgress(
+        [
+          { areaId: "scheduled-only", status: "SCHEDULED" },
+          { areaId: "active", status: "IN_PROGRESS" },
+          { areaId: "retired", status: "SUBMITTED" },
+        ],
+        ["scheduled-only", "active"],
+      ),
+    ).toEqual({
+      scheduled: 3,
+      submitted: 1,
+      completionRate: 33,
+      coveredAreas: 1,
+      activeAreas: 2,
+      coverageRate: 50,
     });
   });
 });

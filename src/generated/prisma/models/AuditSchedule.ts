@@ -46,6 +46,7 @@ export type AuditScheduleMinAggregateOutputType = {
   dayOfMonth: number | null
   startDate: Date | null
   isActive: boolean | null
+  createdAt: Date | null
 }
 
 export type AuditScheduleMaxAggregateOutputType = {
@@ -58,6 +59,7 @@ export type AuditScheduleMaxAggregateOutputType = {
   dayOfMonth: number | null
   startDate: Date | null
   isActive: boolean | null
+  createdAt: Date | null
 }
 
 export type AuditScheduleCountAggregateOutputType = {
@@ -70,6 +72,7 @@ export type AuditScheduleCountAggregateOutputType = {
   dayOfMonth: number
   startDate: number
   isActive: number
+  createdAt: number
   _all: number
 }
 
@@ -94,6 +97,7 @@ export type AuditScheduleMinAggregateInputType = {
   dayOfMonth?: true
   startDate?: true
   isActive?: true
+  createdAt?: true
 }
 
 export type AuditScheduleMaxAggregateInputType = {
@@ -106,6 +110,7 @@ export type AuditScheduleMaxAggregateInputType = {
   dayOfMonth?: true
   startDate?: true
   isActive?: true
+  createdAt?: true
 }
 
 export type AuditScheduleCountAggregateInputType = {
@@ -118,6 +123,7 @@ export type AuditScheduleCountAggregateInputType = {
   dayOfMonth?: true
   startDate?: true
   isActive?: true
+  createdAt?: true
   _all?: true
 }
 
@@ -217,6 +223,7 @@ export type AuditScheduleGroupByOutputType = {
   dayOfMonth: number | null
   startDate: Date
   isActive: boolean
+  createdAt: Date
   _count: AuditScheduleCountAggregateOutputType | null
   _avg: AuditScheduleAvgAggregateOutputType | null
   _sum: AuditScheduleSumAggregateOutputType | null
@@ -252,6 +259,7 @@ export type AuditScheduleWhereInput = {
   dayOfMonth?: Prisma.IntNullableFilter<"AuditSchedule"> | number | null
   startDate?: Prisma.DateTimeFilter<"AuditSchedule"> | Date | string
   isActive?: Prisma.BoolFilter<"AuditSchedule"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"AuditSchedule"> | Date | string
   area?: Prisma.XOR<Prisma.AreaScalarRelationFilter, Prisma.AreaWhereInput>
   template?: Prisma.XOR<Prisma.ChecklistTemplateScalarRelationFilter, Prisma.ChecklistTemplateWhereInput>
   auditor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -268,6 +276,7 @@ export type AuditScheduleOrderByWithRelationInput = {
   dayOfMonth?: Prisma.SortOrderInput | Prisma.SortOrder
   startDate?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   area?: Prisma.AreaOrderByWithRelationInput
   template?: Prisma.ChecklistTemplateOrderByWithRelationInput
   auditor?: Prisma.UserOrderByWithRelationInput
@@ -287,6 +296,7 @@ export type AuditScheduleWhereUniqueInput = Prisma.AtLeast<{
   dayOfMonth?: Prisma.IntNullableFilter<"AuditSchedule"> | number | null
   startDate?: Prisma.DateTimeFilter<"AuditSchedule"> | Date | string
   isActive?: Prisma.BoolFilter<"AuditSchedule"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"AuditSchedule"> | Date | string
   area?: Prisma.XOR<Prisma.AreaScalarRelationFilter, Prisma.AreaWhereInput>
   template?: Prisma.XOR<Prisma.ChecklistTemplateScalarRelationFilter, Prisma.ChecklistTemplateWhereInput>
   auditor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -303,6 +313,7 @@ export type AuditScheduleOrderByWithAggregationInput = {
   dayOfMonth?: Prisma.SortOrderInput | Prisma.SortOrder
   startDate?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   _count?: Prisma.AuditScheduleCountOrderByAggregateInput
   _avg?: Prisma.AuditScheduleAvgOrderByAggregateInput
   _max?: Prisma.AuditScheduleMaxOrderByAggregateInput
@@ -323,6 +334,7 @@ export type AuditScheduleScalarWhereWithAggregatesInput = {
   dayOfMonth?: Prisma.IntNullableWithAggregatesFilter<"AuditSchedule"> | number | null
   startDate?: Prisma.DateTimeWithAggregatesFilter<"AuditSchedule"> | Date | string
   isActive?: Prisma.BoolWithAggregatesFilter<"AuditSchedule"> | boolean
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"AuditSchedule"> | Date | string
 }
 
 export type AuditScheduleCreateInput = {
@@ -332,6 +344,7 @@ export type AuditScheduleCreateInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   area: Prisma.AreaCreateNestedOneWithoutSchedulesInput
   template: Prisma.ChecklistTemplateCreateNestedOneWithoutSchedulesInput
   auditor: Prisma.UserCreateNestedOneWithoutAuditSchedulesInput
@@ -348,6 +361,7 @@ export type AuditScheduleUncheckedCreateInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   audits?: Prisma.AuditUncheckedCreateNestedManyWithoutScheduleInput
 }
 
@@ -358,6 +372,7 @@ export type AuditScheduleUpdateInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   area?: Prisma.AreaUpdateOneRequiredWithoutSchedulesNestedInput
   template?: Prisma.ChecklistTemplateUpdateOneRequiredWithoutSchedulesNestedInput
   auditor?: Prisma.UserUpdateOneRequiredWithoutAuditSchedulesNestedInput
@@ -374,6 +389,7 @@ export type AuditScheduleUncheckedUpdateInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   audits?: Prisma.AuditUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
@@ -387,6 +403,7 @@ export type AuditScheduleCreateManyInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
 }
 
 export type AuditScheduleUpdateManyMutationInput = {
@@ -396,6 +413,7 @@ export type AuditScheduleUpdateManyMutationInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AuditScheduleUncheckedUpdateManyInput = {
@@ -408,6 +426,7 @@ export type AuditScheduleUncheckedUpdateManyInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AuditScheduleListRelationFilter = {
@@ -430,6 +449,7 @@ export type AuditScheduleCountOrderByAggregateInput = {
   dayOfMonth?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type AuditScheduleAvgOrderByAggregateInput = {
@@ -447,6 +467,7 @@ export type AuditScheduleMaxOrderByAggregateInput = {
   dayOfMonth?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type AuditScheduleMinOrderByAggregateInput = {
@@ -459,6 +480,7 @@ export type AuditScheduleMinOrderByAggregateInput = {
   dayOfMonth?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type AuditScheduleSumOrderByAggregateInput = {
@@ -632,6 +654,7 @@ export type AuditScheduleCreateWithoutAreaInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   template: Prisma.ChecklistTemplateCreateNestedOneWithoutSchedulesInput
   auditor: Prisma.UserCreateNestedOneWithoutAuditSchedulesInput
   audits?: Prisma.AuditCreateNestedManyWithoutScheduleInput
@@ -646,6 +669,7 @@ export type AuditScheduleUncheckedCreateWithoutAreaInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   audits?: Prisma.AuditUncheckedCreateNestedManyWithoutScheduleInput
 }
 
@@ -688,6 +712,7 @@ export type AuditScheduleScalarWhereInput = {
   dayOfMonth?: Prisma.IntNullableFilter<"AuditSchedule"> | number | null
   startDate?: Prisma.DateTimeFilter<"AuditSchedule"> | Date | string
   isActive?: Prisma.BoolFilter<"AuditSchedule"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"AuditSchedule"> | Date | string
 }
 
 export type AuditScheduleCreateWithoutAuditorInput = {
@@ -697,6 +722,7 @@ export type AuditScheduleCreateWithoutAuditorInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   area: Prisma.AreaCreateNestedOneWithoutSchedulesInput
   template: Prisma.ChecklistTemplateCreateNestedOneWithoutSchedulesInput
   audits?: Prisma.AuditCreateNestedManyWithoutScheduleInput
@@ -711,6 +737,7 @@ export type AuditScheduleUncheckedCreateWithoutAuditorInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   audits?: Prisma.AuditUncheckedCreateNestedManyWithoutScheduleInput
 }
 
@@ -747,6 +774,7 @@ export type AuditScheduleCreateWithoutTemplateInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   area: Prisma.AreaCreateNestedOneWithoutSchedulesInput
   auditor: Prisma.UserCreateNestedOneWithoutAuditSchedulesInput
   audits?: Prisma.AuditCreateNestedManyWithoutScheduleInput
@@ -761,6 +789,7 @@ export type AuditScheduleUncheckedCreateWithoutTemplateInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   audits?: Prisma.AuditUncheckedCreateNestedManyWithoutScheduleInput
 }
 
@@ -797,6 +826,7 @@ export type AuditScheduleCreateWithoutAuditsInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
   area: Prisma.AreaCreateNestedOneWithoutSchedulesInput
   template: Prisma.ChecklistTemplateCreateNestedOneWithoutSchedulesInput
   auditor: Prisma.UserCreateNestedOneWithoutAuditSchedulesInput
@@ -812,6 +842,7 @@ export type AuditScheduleUncheckedCreateWithoutAuditsInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
 }
 
 export type AuditScheduleCreateOrConnectWithoutAuditsInput = {
@@ -837,6 +868,7 @@ export type AuditScheduleUpdateWithoutAuditsInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   area?: Prisma.AreaUpdateOneRequiredWithoutSchedulesNestedInput
   template?: Prisma.ChecklistTemplateUpdateOneRequiredWithoutSchedulesNestedInput
   auditor?: Prisma.UserUpdateOneRequiredWithoutAuditSchedulesNestedInput
@@ -852,6 +884,7 @@ export type AuditScheduleUncheckedUpdateWithoutAuditsInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AuditScheduleCreateManyAreaInput = {
@@ -863,6 +896,7 @@ export type AuditScheduleCreateManyAreaInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
 }
 
 export type AuditScheduleUpdateWithoutAreaInput = {
@@ -872,6 +906,7 @@ export type AuditScheduleUpdateWithoutAreaInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   template?: Prisma.ChecklistTemplateUpdateOneRequiredWithoutSchedulesNestedInput
   auditor?: Prisma.UserUpdateOneRequiredWithoutAuditSchedulesNestedInput
   audits?: Prisma.AuditUpdateManyWithoutScheduleNestedInput
@@ -886,6 +921,7 @@ export type AuditScheduleUncheckedUpdateWithoutAreaInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   audits?: Prisma.AuditUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
@@ -898,6 +934,7 @@ export type AuditScheduleUncheckedUpdateManyWithoutAreaInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AuditScheduleCreateManyAuditorInput = {
@@ -909,6 +946,7 @@ export type AuditScheduleCreateManyAuditorInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
 }
 
 export type AuditScheduleUpdateWithoutAuditorInput = {
@@ -918,6 +956,7 @@ export type AuditScheduleUpdateWithoutAuditorInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   area?: Prisma.AreaUpdateOneRequiredWithoutSchedulesNestedInput
   template?: Prisma.ChecklistTemplateUpdateOneRequiredWithoutSchedulesNestedInput
   audits?: Prisma.AuditUpdateManyWithoutScheduleNestedInput
@@ -932,6 +971,7 @@ export type AuditScheduleUncheckedUpdateWithoutAuditorInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   audits?: Prisma.AuditUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
@@ -944,6 +984,7 @@ export type AuditScheduleUncheckedUpdateManyWithoutAuditorInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AuditScheduleCreateManyTemplateInput = {
@@ -955,6 +996,7 @@ export type AuditScheduleCreateManyTemplateInput = {
   dayOfMonth?: number | null
   startDate: Date | string
   isActive?: boolean
+  createdAt?: Date | string
 }
 
 export type AuditScheduleUpdateWithoutTemplateInput = {
@@ -964,6 +1006,7 @@ export type AuditScheduleUpdateWithoutTemplateInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   area?: Prisma.AreaUpdateOneRequiredWithoutSchedulesNestedInput
   auditor?: Prisma.UserUpdateOneRequiredWithoutAuditSchedulesNestedInput
   audits?: Prisma.AuditUpdateManyWithoutScheduleNestedInput
@@ -978,6 +1021,7 @@ export type AuditScheduleUncheckedUpdateWithoutTemplateInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   audits?: Prisma.AuditUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
@@ -990,6 +1034,7 @@ export type AuditScheduleUncheckedUpdateManyWithoutTemplateInput = {
   dayOfMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -1033,6 +1078,7 @@ export type AuditScheduleSelect<ExtArgs extends runtime.Types.Extensions.Interna
   dayOfMonth?: boolean
   startDate?: boolean
   isActive?: boolean
+  createdAt?: boolean
   area?: boolean | Prisma.AreaDefaultArgs<ExtArgs>
   template?: boolean | Prisma.ChecklistTemplateDefaultArgs<ExtArgs>
   auditor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1050,6 +1096,7 @@ export type AuditScheduleSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   dayOfMonth?: boolean
   startDate?: boolean
   isActive?: boolean
+  createdAt?: boolean
   area?: boolean | Prisma.AreaDefaultArgs<ExtArgs>
   template?: boolean | Prisma.ChecklistTemplateDefaultArgs<ExtArgs>
   auditor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1065,6 +1112,7 @@ export type AuditScheduleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   dayOfMonth?: boolean
   startDate?: boolean
   isActive?: boolean
+  createdAt?: boolean
   area?: boolean | Prisma.AreaDefaultArgs<ExtArgs>
   template?: boolean | Prisma.ChecklistTemplateDefaultArgs<ExtArgs>
   auditor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1080,9 +1128,10 @@ export type AuditScheduleSelectScalar = {
   dayOfMonth?: boolean
   startDate?: boolean
   isActive?: boolean
+  createdAt?: boolean
 }
 
-export type AuditScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "areaId" | "templateId" | "auditorId" | "frequency" | "dayOfWeek" | "dayOfMonth" | "startDate" | "isActive", ExtArgs["result"]["auditSchedule"]>
+export type AuditScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "areaId" | "templateId" | "auditorId" | "frequency" | "dayOfWeek" | "dayOfMonth" | "startDate" | "isActive" | "createdAt", ExtArgs["result"]["auditSchedule"]>
 export type AuditScheduleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   area?: boolean | Prisma.AreaDefaultArgs<ExtArgs>
   template?: boolean | Prisma.ChecklistTemplateDefaultArgs<ExtArgs>
@@ -1119,6 +1168,7 @@ export type $AuditSchedulePayload<ExtArgs extends runtime.Types.Extensions.Inter
     dayOfMonth: number | null
     startDate: Date
     isActive: boolean
+    createdAt: Date
   }, ExtArgs["result"]["auditSchedule"]>
   composites: {}
 }
@@ -1555,6 +1605,7 @@ export interface AuditScheduleFieldRefs {
   readonly dayOfMonth: Prisma.FieldRef<"AuditSchedule", 'Int'>
   readonly startDate: Prisma.FieldRef<"AuditSchedule", 'DateTime'>
   readonly isActive: Prisma.FieldRef<"AuditSchedule", 'Boolean'>
+  readonly createdAt: Prisma.FieldRef<"AuditSchedule", 'DateTime'>
 }
     
 

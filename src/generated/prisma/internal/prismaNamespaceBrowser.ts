@@ -66,7 +66,8 @@ export const ModelName = {
   Comment: 'Comment',
   Notification: 'Notification',
   Counter: 'Counter',
-  LoginThrottle: 'LoginThrottle'
+  LoginThrottle: 'LoginThrottle',
+  AccountResetBatch: 'AccountResetBatch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -165,7 +166,8 @@ export const AuditScheduleScalarFieldEnum = {
   dayOfWeek: 'dayOfWeek',
   dayOfMonth: 'dayOfMonth',
   startDate: 'startDate',
-  isActive: 'isActive'
+  isActive: 'isActive',
+  createdAt: 'createdAt'
 } as const
 
 export type AuditScheduleScalarFieldEnum = (typeof AuditScheduleScalarFieldEnum)[keyof typeof AuditScheduleScalarFieldEnum]
@@ -296,6 +298,16 @@ export const LoginThrottleScalarFieldEnum = {
 } as const
 
 export type LoginThrottleScalarFieldEnum = (typeof LoginThrottleScalarFieldEnum)[keyof typeof LoginThrottleScalarFieldEnum]
+
+
+export const AccountResetBatchScalarFieldEnum = {
+  id: 'id',
+  releaseId: 'releaseId',
+  userCount: 'userCount',
+  committedAt: 'committedAt'
+} as const
+
+export type AccountResetBatchScalarFieldEnum = (typeof AccountResetBatchScalarFieldEnum)[keyof typeof AccountResetBatchScalarFieldEnum]
 
 
 export const SortOrder = {

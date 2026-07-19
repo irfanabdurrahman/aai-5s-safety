@@ -140,10 +140,21 @@ export function calculateDashboardMetrics(
 /** Pure audit progress for the selected reporting period. */
 export function calculateAuditProgress(
   audits: AuditObservation[],
-  activeAreas: number,
+  activeAreaIds: string[],
 ) {
   const submitted = audits.filter((audit) => audit.status === "SUBMITTED").length;
-  const coveredAreas = new Set(audits.map((audit) => audit.areaId)).size;
+  const activeAreaSet = new Set(activeAreaIds);
+  const touchedAreaIds = new Set(
+    audits
+      .filter(
+        (audit) =>
+          (audit.status === "IN_PROGRESS" || audit.status === "SUBMITTED") &&
+          activeAreaSet.has(audit.areaId),
+      )
+      .map((audit) => audit.areaId),
+  );
+  const coveredAreas = touchedAreaIds.size;
+  const activeAreas = activeAreaSet.size;
 
   return {
     scheduled: audits.length,
