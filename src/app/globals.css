@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Brand tokens — selaras portal SSO PT Akebono Brake Astra Indonesia
+   (sidebar indigo-ungu, aksen hijau, tile gradient, merah untuk safety CTA)
+   ============================================================ */
+:root {
+  --brand-primary: #5a63c0; /* indigo portal */
+  --brand-primary-dark: #434a9e;
+  --brand-primary-deeper: #363c85;
+  --brand-primary-soft: #eef0fb;
+  --brand-accent: #d6001c; /* merah safety (logo Akebono) */
+  --brand-accent-soft: #fdeaec;
+  --brand-green: #1cab5e; /* hijau portal */
+  --brand-green-soft: #e4f7ec;
+
+  --background: #f4f5fa;
+  --surface: #ffffff;
+  --foreground: #101828;
+  --muted: #667085;
+  --border: #e4e7ec;
+
+  --ok: #12833b;
+  --ok-soft: #e5f6ec;
+  --warn: #b54708;
+  --warn-soft: #fef0e6;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --info: #175cd3;
+  --info-soft: #eaf1fd;
+}
+
+@theme inline {
+  --color-brand: var(--brand-primary);
+  --color-brand-dark: var(--brand-primary-dark);
+  --color-brand-deeper: var(--brand-primary-deeper);
+  --color-brand-soft: var(--brand-primary-soft);
+  --color-accent: var(--brand-accent);
+  --color-accent-soft: var(--brand-accent-soft);
+  --color-green: var(--brand-green);
+  --color-green-soft: var(--brand-green-soft);
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--border);
+
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --font-sans: var(--font-jakarta);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Tile gradient ala portal Akebono ===== */
+.tile-green {
+  background: linear-gradient(135deg, #44d98b, #17a55b);
+}
+.tile-indigo {
+  background: linear-gradient(135deg, #7b83dd, #5a63c0);
+}
+.tile-blue {
+  background: linear-gradient(135deg, #4fa8f5, #2472d8);
+}
+.tile-orange {
+  background: linear-gradient(135deg, #ffb054, #f5821f);
+}
+.tile-red {
+  background: linear-gradient(135deg, #ff5b6b, #d6001c);
+}
+.tile-teal {
+  background: linear-gradient(135deg, #3ed6c4, #12a594);
+}
+
+/* Sidebar / header gradient indigo */
+.brand-side {
+  background: linear-gradient(180deg, #636bc9 0%, #4a51a8 100%);
+}
+.brand-top {
+  background: linear-gradient(90deg, #6a72cf, #5a63c0);
+}
+
+/* Scroll halus untuk area horizontal (chips filter, tabel) */
+.scroll-x {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* Snap scroll untuk galeri mode HP (ala Instagram) */
+.snap-feed {
+  scroll-snap-type: y mandatory;
+}
+.snap-feed > * {
+  scroll-snap-align: start;
+}
+
+/* Animasi slide galeri TV */
+@keyframes galeri-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.galeri-slide {
+  animation: galeri-in 0.7s ease-out;
+}
