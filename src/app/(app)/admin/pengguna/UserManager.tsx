@@ -6,6 +6,7 @@ import {
   updateUser,
   toggleUserActive,
   resetPassword,
+  type TemporaryPasswordState,
 } from "@/actions/admin";
 import type { ActionState } from "@/actions/auth";
 import type { Role } from "@/generated/prisma/enums";
@@ -75,7 +76,7 @@ function RoleFields({
 }
 
 function CreateForm({ departments }: { departments: Dept[] }) {
-  const [state, action, pending] = useActionState<ActionState, FormData>(
+  const [state, action, pending] = useActionState<TemporaryPasswordState, FormData>(
     createUser,
     {},
   );
@@ -90,10 +91,16 @@ function CreateForm({ departments }: { departments: Dept[] }) {
           </div>
           <RoleFields departments={departments} />
           <FieldError message={state.error} />
-          {state.ok && (
-            <p className="text-xs font-semibold text-ok">
-              Pengguna berhasil ditambahkan.
-            </p>
+          {state.ok && state.temporaryPassword && (
+            <div className="rounded-xl border border-ok/30 bg-ok-soft p-3 text-xs">
+              <p className="font-bold text-ok">Pengguna berhasil ditambahkan.</p>
+              <p className="mt-1 text-muted">
+                Salin password sementara sekarang. Nilai ini tidak ditampilkan lagi.
+              </p>
+              <code className="mt-2 block select-all rounded-lg bg-surface px-3 py-2 font-mono text-sm font-bold text-foreground">
+                {state.temporaryPassword}
+              </code>
+            </div>
           )}
           <Button type="submit" disabled={pending}>
             <IconPlus size={16} />
@@ -102,6 +109,42 @@ function CreateForm({ departments }: { departments: Dept[] }) {
         </form>
       </CardBody>
     </Card>
+  );
+}
+
+function ResetPasswordForm({
+  userId,
+  isActive,
+}: {
+  userId: string;
+  isActive: boolean;
+}) {
+  const [state, action, pending] = useActionState<TemporaryPasswordState, FormData>(
+    resetPassword,
+    {},
+  );
+  return (
+    <div className="min-w-0">
+      <form action={action}>
+        <input type="hidden" name="id" value={userId} />
+        <Button size="sm" variant="ghost" type="submit" disabled={pending}>
+          {pending
+            ? "Memproses…"
+            : isActive
+              ? "Reset PW"
+              : "Aktifkan + Reset PW"}
+        </Button>
+      </form>
+      {state.temporaryPassword && (
+        <div className="mt-2 max-w-64 rounded-lg border border-warn/30 bg-warn-soft p-2 text-[11px]">
+          <p className="font-bold text-warn">Salin sekali:</p>
+          <code className="mt-1 block select-all break-all font-mono font-bold text-foreground">
+            {state.temporaryPassword}
+          </code>
+        </div>
+      )}
+      <FieldError message={state.error} />
+    </div>
   );
 }
 
@@ -199,23 +242,20 @@ export function UserManager({
                     >
                       Edit
                     </Button>
-                    <form action={resetPassword}>
-                      <input type="hidden" name="id" value={u.id} />
-                      <Button size="sm" variant="ghost" type="submit">
-                        Reset PW
-                      </Button>
-                    </form>
-                    <form action={toggleUserActive}>
-                      <input type="hidden" name="id" value={u.id} />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        type="submit"
-                        className={u.isActive ? "text-danger" : "text-ok"}
-                      >
-                        {u.isActive ? "Nonaktifkan" : "Aktifkan"}
-                      </Button>
-                    </form>
+                    <ResetPasswordForm userId={u.id} isActive={u.isActive} />
+                    {u.isActive && (
+                      <form action={toggleUserActive}>
+                        <input type="hidden" name="id" value={u.id} />
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          type="submit"
+                          className="text-danger"
+                        >
+                          Nonaktifkan
+                        </Button>
+                      </form>
+                    )}
                   </div>
                 </div>
                 {editing === u.id && (

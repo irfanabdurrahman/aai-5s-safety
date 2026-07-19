@@ -11,7 +11,7 @@ import { LogoutButton } from "./LogoutButton";
 export const metadata: Metadata = { title: "Profil" };
 
 export default async function ProfilPage() {
-  const user = await requireUser();
+  const user = await requireUser(undefined, true);
   const [reported, closed] = await Promise.all([
     prisma.finding.count({ where: { reporterId: user.id } }),
     prisma.finding.count({ where: { picId: user.id, status: "CLOSED" } }),
@@ -56,7 +56,7 @@ export default async function ProfilPage() {
 
       {user.mustChangePassword && (
         <div className="rounded-xl bg-warn-soft px-4 py-3 text-sm font-semibold text-warn">
-          Demi keamanan, silakan ganti password bawaan admin di bawah ini.
+          Demi keamanan, silakan ganti password sementara di bawah ini.
         </div>
       )}
 

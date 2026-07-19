@@ -12,6 +12,7 @@ export type NavItem = {
     | "chart"
     | "trophy"
     | "checklist"
+    | "tv"
     | "building";
   roles?: Role[]; // undefined = semua role
   mobile?: boolean; // tampil di bottom nav HP
@@ -40,6 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["SUPERVISOR", "ADMIN"],
   },
   { href: "/leaderboard", label: "Peringkat", icon: "trophy" },
+  { href: "/galeri", label: "Safety & 5S Live Wall", icon: "tv" },
   { href: "/admin", label: "Admin", icon: "building", roles: ["ADMIN"] },
   { href: "/profil", label: "Profil", icon: "user", mobile: true },
 ];

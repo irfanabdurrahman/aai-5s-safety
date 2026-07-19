@@ -65,7 +65,8 @@ export const ModelName = {
   FindingStatusHistory: 'FindingStatusHistory',
   Comment: 'Comment',
   Notification: 'Notification',
-  Counter: 'Counter'
+  Counter: 'Counter',
+  LoginThrottle: 'LoginThrottle'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -125,6 +126,7 @@ export const UserScalarFieldEnum = {
   departmentId: 'departmentId',
   isActive: 'isActive',
   mustChangePassword: 'mustChangePassword',
+  sessionVersion: 'sessionVersion',
   createdAt: 'createdAt'
 } as const
 
@@ -270,6 +272,7 @@ export const NotificationScalarFieldEnum = {
   auditId: 'auditId',
   title: 'title',
   body: 'body',
+  dedupeKey: 'dedupeKey',
   isRead: 'isRead',
   createdAt: 'createdAt'
 } as const
@@ -283,6 +286,16 @@ export const CounterScalarFieldEnum = {
 } as const
 
 export type CounterScalarFieldEnum = (typeof CounterScalarFieldEnum)[keyof typeof CounterScalarFieldEnum]
+
+
+export const LoginThrottleScalarFieldEnum = {
+  key: 'key',
+  count: 'count',
+  expiresAt: 'expiresAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LoginThrottleScalarFieldEnum = (typeof LoginThrottleScalarFieldEnum)[keyof typeof LoginThrottleScalarFieldEnum]
 
 
 export const SortOrder = {

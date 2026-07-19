@@ -32,9 +32,8 @@ export default async function PenggunaPage() {
       <div>
         <h1 className="text-xl font-extrabold">Kelola Pengguna</h1>
         <p className="text-sm text-muted">
-          Akun baru dibuat dengan password default{" "}
-          <code className="rounded bg-background px-1 font-bold">akebono123</code>{" "}
-          dan wajib diganti saat login pertama.
+          Akun baru mendapat password sementara unik yang hanya ditampilkan sekali
+          kepada admin dan wajib diganti saat login pertama.
         </p>
       </div>
       <UserManager users={users} departments={departments} />

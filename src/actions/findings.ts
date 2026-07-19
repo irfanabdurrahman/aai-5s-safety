@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
-import { savePhoto } from "@/lib/upload";
+import { savePhoto, removePhotos } from "@/lib/upload";
+import { saveBatchAtomically } from "@/lib/upload-batch";
 import { nextFindingNumber } from "@/lib/numbering";
 import { parseDateOnly, toDateStr, wibToday } from "@/lib/dates";
 import {
@@ -64,7 +65,9 @@ async function savePhotos(
   }
   if (photos.length > 4) return { error: "Maksimal 4 foto" };
   try {
-    return { paths: await Promise.all(photos.map((p) => savePhoto(p))) };
+    return {
+      paths: await saveBatchAtomically(photos, savePhoto, removePhotos),
+    };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Gagal menyimpan foto" };
   }
@@ -108,9 +111,11 @@ export async function createSafetyReport(
   const saved = await savePhotos(formData, true);
   if (saved.error) return { error: "Foto kondisi temuan wajib dilampirkan" };
 
-  const finding = await prisma.$transaction(async (tx) => {
-    const number = await nextFindingNumber(tx, "SAFETY_REPORT");
-    return tx.finding.create({
+  let finding;
+  try {
+    finding = await prisma.$transaction(async (tx) => {
+      const number = await nextFindingNumber(tx, "SAFETY_REPORT");
+      return tx.finding.create({
       data: {
         number,
         source: "SAFETY_REPORT",
@@ -132,8 +137,12 @@ export async function createSafetyReport(
           create: { toStatus: "OPEN", actorId: user.id, note: "Temuan dilaporkan" },
         },
       },
+      });
     });
-  });
+  } catch {
+    await removePhotos(saved.paths ?? []);
+    return { error: "Gagal menyimpan temuan. Silakan coba lagi." };
+  }
 
   const supervisorIds = await departmentSupervisors(area.departmentId);
   await notify(
@@ -181,7 +190,9 @@ export async function assignPic(
   const pic = await prisma.user.findUnique({
     where: { id: parsed.data.picId },
   });
-  if (!pic || !pic.isActive) return { error: "PIC tidak ditemukan" };
+  if (!pic || !pic.isActive || pic.role !== "PIC_AREA" || pic.departmentId !== finding.area.department.id) {
+    return { error: "PIC harus PIC Area aktif dari departemen temuan" };
+  }
 
   const ok = await transitionFinding(user, finding, "IN_PROGRESS", {
     note: `PIC: ${pic.name}, target ${toDateStr(dueDate)}`,
@@ -216,28 +227,55 @@ export async function completeFix(
 
   const finding = await findingForWorkflow(parsed.data.findingId);
   if (!finding) return { error: "Temuan tidak ditemukan" };
+  // Authorization and workflow state are checked before reading/writing uploads.
+  if (!(user.id === finding.picId || user.role === "ADMIN") || finding.status !== "IN_PROGRESS") {
+    return { error: "Hanya PIC yang ditugaskan yang bisa menyelesaikan perbaikan" };
+  }
 
   const saved = await savePhotos(formData, true);
   if (saved.error) {
     return { error: "Foto kondisi sesudah perbaikan wajib dilampirkan" };
   }
 
-  const ok = await transitionFinding(user, finding, "PENDING_VERIFICATION", {
-    note: parsed.data.actionNote.slice(0, 200),
-    data: { actionNote: parsed.data.actionNote },
-  });
-  if (!ok) {
-    return { error: "Hanya PIC yang ditugaskan yang bisa menyelesaikan perbaikan" };
-  }
+  try {
+    const transitioned = await prisma.$transaction(async (tx) => {
+      const updated = await tx.finding.updateMany({
+        where: { id: finding.id, status: "IN_PROGRESS", picId: finding.picId },
+        data: {
+          status: "PENDING_VERIFICATION",
+          actionNote: parsed.data.actionNote,
+        },
+      });
+      if (updated.count !== 1) return false;
 
-  await prisma.findingPhoto.createMany({
-    data: saved.paths!.map((filePath) => ({
-      findingId: finding.id,
-      type: "AFTER" as const,
-      filePath,
-      uploadedById: user.id,
-    })),
-  });
+      await tx.findingStatusHistory.create({
+        data: {
+          findingId: finding.id,
+          fromStatus: "IN_PROGRESS",
+          toStatus: "PENDING_VERIFICATION",
+          actorId: user.id,
+          note: parsed.data.actionNote.slice(0, 200),
+        },
+      });
+      await tx.findingPhoto.createMany({
+        data: saved.paths!.map((filePath) => ({
+          findingId: finding.id,
+          type: "AFTER" as const,
+          filePath,
+          uploadedById: user.id,
+        })),
+      });
+      return true;
+    });
+
+    if (!transitioned) {
+      await removePhotos(saved.paths ?? []);
+      return { error: "Status temuan telah berubah. Muat ulang halaman." };
+    }
+  } catch {
+    await removePhotos(saved.paths ?? []);
+    return { error: "Gagal menyimpan perbaikan. Silakan coba lagi." };
+  }
 
   const area = await prisma.area.findUnique({ where: { id: finding.areaId } });
   const supervisorIds = area

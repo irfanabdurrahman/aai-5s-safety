@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { TvBoard } from "./TvBoard";
+import { cookies } from "next/headers";
+import { KIOSK_COOKIE, verifyKioskSession } from "@/lib/kiosk-session";
 
 export const metadata: Metadata = { title: "TV Dashboard" };
 
-export default async function TvPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ token?: string }>;
-}) {
-  const { token } = await searchParams;
-  const ok = !!process.env.TV_TOKEN && token === process.env.TV_TOKEN;
+export default async function TvPage() {
+  const store = await cookies();
+  const ok = await verifyKioskSession(store.get(KIOSK_COOKIE)?.value);
 
   if (!ok) {
     return (
@@ -27,5 +25,5 @@ export default async function TvPage({
     );
   }
 
-  return <TvBoard token={token!} />;
+  return <TvBoard />;
 }

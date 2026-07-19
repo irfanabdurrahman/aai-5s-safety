@@ -294,6 +294,7 @@ export type AuditOrderByWithRelationInput = {
 
 export type AuditWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  scheduleId_scheduledDate?: Prisma.AuditScheduleIdScheduledDateCompoundUniqueInput
   AND?: Prisma.AuditWhereInput | Prisma.AuditWhereInput[]
   OR?: Prisma.AuditWhereInput[]
   NOT?: Prisma.AuditWhereInput | Prisma.AuditWhereInput[]
@@ -313,7 +314,7 @@ export type AuditWhereUniqueInput = Prisma.AtLeast<{
   auditor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   scores?: Prisma.AuditScoreListRelationFilter
   findings?: Prisma.FindingListRelationFilter
-}, "id">
+}, "id" | "scheduleId_scheduledDate">
 
 export type AuditOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -461,6 +462,11 @@ export type AuditListRelationFilter = {
 
 export type AuditOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AuditScheduleIdScheduledDateCompoundUniqueInput = {
+  scheduleId: string
+  scheduledDate: Date | string
 }
 
 export type AuditCountOrderByAggregateInput = {

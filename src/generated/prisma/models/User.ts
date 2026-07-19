@@ -20,8 +20,18 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  sessionVersion: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  sessionVersion: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -33,6 +43,7 @@ export type UserMinAggregateOutputType = {
   departmentId: string | null
   isActive: boolean | null
   mustChangePassword: boolean | null
+  sessionVersion: number | null
   createdAt: Date | null
 }
 
@@ -45,6 +56,7 @@ export type UserMaxAggregateOutputType = {
   departmentId: string | null
   isActive: boolean | null
   mustChangePassword: boolean | null
+  sessionVersion: number | null
   createdAt: Date | null
 }
 
@@ -57,10 +69,19 @@ export type UserCountAggregateOutputType = {
   departmentId: number
   isActive: number
   mustChangePassword: number
+  sessionVersion: number
   createdAt: number
   _all: number
 }
 
+
+export type UserAvgAggregateInputType = {
+  sessionVersion?: true
+}
+
+export type UserSumAggregateInputType = {
+  sessionVersion?: true
+}
 
 export type UserMinAggregateInputType = {
   id?: true
@@ -71,6 +92,7 @@ export type UserMinAggregateInputType = {
   departmentId?: true
   isActive?: true
   mustChangePassword?: true
+  sessionVersion?: true
   createdAt?: true
 }
 
@@ -83,6 +105,7 @@ export type UserMaxAggregateInputType = {
   departmentId?: true
   isActive?: true
   mustChangePassword?: true
+  sessionVersion?: true
   createdAt?: true
 }
 
@@ -95,6 +118,7 @@ export type UserCountAggregateInputType = {
   departmentId?: true
   isActive?: true
   mustChangePassword?: true
+  sessionVersion?: true
   createdAt?: true
   _all?: true
 }
@@ -137,6 +161,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -167,6 +203,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -180,8 +218,11 @@ export type UserGroupByOutputType = {
   departmentId: string | null
   isActive: boolean
   mustChangePassword: boolean
+  sessionVersion: number
   createdAt: Date
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -213,6 +254,7 @@ export type UserWhereInput = {
   departmentId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntFilter<"User"> | number
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   department?: Prisma.XOR<Prisma.DepartmentNullableScalarRelationFilter, Prisma.DepartmentWhereInput> | null
   picAreas?: Prisma.AreaListRelationFilter
@@ -236,6 +278,7 @@ export type UserOrderByWithRelationInput = {
   departmentId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   department?: Prisma.DepartmentOrderByWithRelationInput
   picAreas?: Prisma.AreaOrderByRelationAggregateInput
@@ -262,6 +305,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   departmentId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntFilter<"User"> | number
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   department?: Prisma.XOR<Prisma.DepartmentNullableScalarRelationFilter, Prisma.DepartmentWhereInput> | null
   picAreas?: Prisma.AreaListRelationFilter
@@ -285,10 +329,13 @@ export type UserOrderByWithAggregationInput = {
   departmentId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -303,6 +350,7 @@ export type UserScalarWhereWithAggregatesInput = {
   departmentId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   mustChangePassword?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
@@ -314,6 +362,7 @@ export type UserCreateInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -337,6 +386,7 @@ export type UserUncheckedCreateInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -358,6 +408,7 @@ export type UserUpdateInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -381,6 +432,7 @@ export type UserUncheckedUpdateInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -403,6 +455,7 @@ export type UserCreateManyInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
 }
 
@@ -414,6 +467,7 @@ export type UserUpdateManyMutationInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -426,6 +480,7 @@ export type UserUncheckedUpdateManyInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -453,7 +508,12 @@ export type UserCountOrderByAggregateInput = {
   departmentId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -465,6 +525,7 @@ export type UserMaxOrderByAggregateInput = {
   departmentId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -477,7 +538,12 @@ export type UserMinOrderByAggregateInput = {
   departmentId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
+  sessionVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  sessionVersion?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -545,6 +611,14 @@ export type UserUpdateOneWithoutPicAreasNestedInput = {
 
 export type EnumRoleFieldUpdateOperationsInput = {
   set?: $Enums.Role
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -689,6 +763,7 @@ export type UserCreateWithoutDepartmentInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingCreateNestedManyWithoutReporterInput
@@ -710,6 +785,7 @@ export type UserUncheckedCreateWithoutDepartmentInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -761,6 +837,7 @@ export type UserScalarWhereInput = {
   departmentId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
+  sessionVersion?: Prisma.IntFilter<"User"> | number
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
 }
 
@@ -772,6 +849,7 @@ export type UserCreateWithoutPicAreasInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   reportedFindings?: Prisma.FindingCreateNestedManyWithoutReporterInput
@@ -794,6 +872,7 @@ export type UserUncheckedCreateWithoutPicAreasInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
   assignedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutPicInput
@@ -830,6 +909,7 @@ export type UserUpdateWithoutPicAreasInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   reportedFindings?: Prisma.FindingUpdateManyWithoutReporterNestedInput
@@ -852,6 +932,7 @@ export type UserUncheckedUpdateWithoutPicAreasInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
   assignedFindings?: Prisma.FindingUncheckedUpdateManyWithoutPicNestedInput
@@ -872,6 +953,7 @@ export type UserCreateWithoutAuditSchedulesInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -894,6 +976,7 @@ export type UserUncheckedCreateWithoutAuditSchedulesInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -930,6 +1013,7 @@ export type UserUpdateWithoutAuditSchedulesInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -952,6 +1036,7 @@ export type UserUncheckedUpdateWithoutAuditSchedulesInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -972,6 +1057,7 @@ export type UserCreateWithoutAuditsInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -994,6 +1080,7 @@ export type UserUncheckedCreateWithoutAuditsInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -1030,6 +1117,7 @@ export type UserUpdateWithoutAuditsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -1052,6 +1140,7 @@ export type UserUncheckedUpdateWithoutAuditsInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -1072,6 +1161,7 @@ export type UserCreateWithoutReportedFindingsInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -1094,6 +1184,7 @@ export type UserUncheckedCreateWithoutReportedFindingsInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   assignedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutPicInput
@@ -1119,6 +1210,7 @@ export type UserCreateWithoutAssignedFindingsInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -1141,6 +1233,7 @@ export type UserUncheckedCreateWithoutAssignedFindingsInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -1166,6 +1259,7 @@ export type UserCreateWithoutVerifiedFindingsInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -1188,6 +1282,7 @@ export type UserUncheckedCreateWithoutVerifiedFindingsInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -1224,6 +1319,7 @@ export type UserUpdateWithoutReportedFindingsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -1246,6 +1342,7 @@ export type UserUncheckedUpdateWithoutReportedFindingsInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   assignedFindings?: Prisma.FindingUncheckedUpdateManyWithoutPicNestedInput
@@ -1277,6 +1374,7 @@ export type UserUpdateWithoutAssignedFindingsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -1299,6 +1397,7 @@ export type UserUncheckedUpdateWithoutAssignedFindingsInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -1330,6 +1429,7 @@ export type UserUpdateWithoutVerifiedFindingsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -1352,6 +1452,7 @@ export type UserUncheckedUpdateWithoutVerifiedFindingsInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -1372,6 +1473,7 @@ export type UserCreateWithoutUploadedPhotosInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -1394,6 +1496,7 @@ export type UserUncheckedCreateWithoutUploadedPhotosInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -1430,6 +1533,7 @@ export type UserUpdateWithoutUploadedPhotosInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -1452,6 +1556,7 @@ export type UserUncheckedUpdateWithoutUploadedPhotosInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -1472,6 +1577,7 @@ export type UserCreateWithoutStatusChangesInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -1494,6 +1600,7 @@ export type UserUncheckedCreateWithoutStatusChangesInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -1530,6 +1637,7 @@ export type UserUpdateWithoutStatusChangesInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -1552,6 +1660,7 @@ export type UserUncheckedUpdateWithoutStatusChangesInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -1572,6 +1681,7 @@ export type UserCreateWithoutCommentsInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -1594,6 +1704,7 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -1630,6 +1741,7 @@ export type UserUpdateWithoutCommentsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -1652,6 +1764,7 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -1672,6 +1785,7 @@ export type UserCreateWithoutNotificationsInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
   picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
@@ -1694,6 +1808,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   departmentId?: string | null
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
   picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
   reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
@@ -1730,6 +1845,7 @@ export type UserUpdateWithoutNotificationsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
@@ -1752,6 +1868,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -1772,6 +1889,7 @@ export type UserCreateManyDepartmentInput = {
   role?: $Enums.Role
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: number
   createdAt?: Date | string
 }
 
@@ -1783,6 +1901,7 @@ export type UserUpdateWithoutDepartmentInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUpdateManyWithoutReporterNestedInput
@@ -1804,6 +1923,7 @@ export type UserUncheckedUpdateWithoutDepartmentInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
   reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
@@ -1825,6 +1945,7 @@ export type UserUncheckedUpdateManyWithoutDepartmentInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1949,6 +2070,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   departmentId?: boolean
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: boolean
   createdAt?: boolean
   department?: boolean | Prisma.User$departmentArgs<ExtArgs>
   picAreas?: boolean | Prisma.User$picAreasArgs<ExtArgs>
@@ -1973,6 +2095,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   departmentId?: boolean
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: boolean
   createdAt?: boolean
   department?: boolean | Prisma.User$departmentArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -1986,6 +2109,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   departmentId?: boolean
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: boolean
   createdAt?: boolean
   department?: boolean | Prisma.User$departmentArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -1999,10 +2123,11 @@ export type UserSelectScalar = {
   departmentId?: boolean
   isActive?: boolean
   mustChangePassword?: boolean
+  sessionVersion?: boolean
   createdAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "npk" | "name" | "passwordHash" | "role" | "departmentId" | "isActive" | "mustChangePassword" | "createdAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "npk" | "name" | "passwordHash" | "role" | "departmentId" | "isActive" | "mustChangePassword" | "sessionVersion" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   department?: boolean | Prisma.User$departmentArgs<ExtArgs>
   picAreas?: boolean | Prisma.User$picAreasArgs<ExtArgs>
@@ -2048,6 +2173,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     departmentId: string | null
     isActive: boolean
     mustChangePassword: boolean
+    sessionVersion: number
     createdAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
@@ -2491,6 +2617,7 @@ export interface UserFieldRefs {
   readonly departmentId: Prisma.FieldRef<"User", 'String'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
   readonly mustChangePassword: Prisma.FieldRef<"User", 'Boolean'>
+  readonly sessionVersion: Prisma.FieldRef<"User", 'Int'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     

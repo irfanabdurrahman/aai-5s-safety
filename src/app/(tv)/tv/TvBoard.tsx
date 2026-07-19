@@ -65,7 +65,7 @@ function Chip({
   );
 }
 
-export function TvBoard({ token }: { token: string }) {
+export function TvBoard() {
   const [data, setData] = useState<TvData | null>(null);
   const [clock, setClock] = useState("");
 
@@ -73,9 +73,7 @@ export function TvBoard({ token }: { token: string }) {
     let alive = true;
     const load = async () => {
       try {
-        const res = await fetch(
-          `/api/tv-data?token=${encodeURIComponent(token)}`,
-        );
+        const res = await fetch("/api/tv-data");
         if (res.ok && alive) setData(await res.json());
       } catch {
         /* koneksi putus — biarkan data lama tampil */
@@ -87,7 +85,7 @@ export function TvBoard({ token }: { token: string }) {
       alive = false;
       clearInterval(t);
     };
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     const tick = () =>
@@ -193,7 +191,7 @@ export function TvBoard({ token }: { token: string }) {
                   {f.photos[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={`/api/files/${f.photos[0].filePath}?token=${encodeURIComponent(token)}`}
+                      src={`/api/files/${f.photos[0].filePath}`}
                       alt=""
                       className="h-[80%] w-[9vh] rounded-xl object-cover"
                     />
@@ -285,7 +283,7 @@ export function TvBoard({ token }: { token: string }) {
       </div>
 
       <footer className="mt-[1vh] flex items-center justify-between text-[clamp(0.5rem,1.2vh,0.75rem)] text-white/30">
-        <span>Galeri foto temuan: /galeri?token=…</span>
+        <span>Safety &amp; 5S Live Wall tersedia di menu aplikasi.</span>
         <span>
           Pembaruan otomatis tiap 45 detik · Lapor temuan lewat aplikasi di HP
           kamu

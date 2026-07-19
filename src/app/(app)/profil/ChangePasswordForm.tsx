@@ -20,7 +20,7 @@ export function ChangePasswordForm() {
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="next">Password baru</Label>
-          <Input id="next" name="next" type="password" minLength={6} required />
+          <Input id="next" name="next" type="password" minLength={12} required />
         </div>
         <div>
           <Label htmlFor="confirm">Ulangi password baru</Label>

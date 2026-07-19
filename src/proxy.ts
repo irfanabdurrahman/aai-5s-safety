@@ -1,12 +1,39 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { ROUTE_ROLES } from "@/lib/rbac";
+import {
+  isRawTvTokenValid,
+  KIOSK_COOKIE,
+  KIOSK_MAX_AGE,
+  signKioskSession,
+} from "@/lib/kiosk-session";
 
 // /galeri cek auth sendiri (token TV ATAU sesi login)
 const PUBLIC_PATHS = ["/login", "/tv", "/galeri", "/manifest.webmanifest"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if ((pathname === "/galeri" || pathname === "/tv") && request.nextUrl.searchParams.has("token")) {
+    if (!isRawTvTokenValid(request.nextUrl.searchParams.get("token"))) {
+      const clean = request.nextUrl.clone();
+      clean.searchParams.delete("token");
+      return NextResponse.redirect(clean);
+    }
+    const clean = request.nextUrl.clone();
+    clean.searchParams.delete("token");
+    const response = NextResponse.redirect(clean);
+    response.cookies.set(KIOSK_COOKIE, await signKioskSession(), {
+      httpOnly: true,
+      secure:
+        process.env.NODE_ENV === "production" &&
+        process.env.INSECURE_COOKIES !== "1",
+      sameSite: "strict",
+      maxAge: KIOSK_MAX_AGE,
+      path: "/",
+    });
+    return response;
+  }
 
   if (
     PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))

@@ -134,6 +134,7 @@ model User {
   departmentId       String?
   isActive           Boolean  @default(true)
   mustChangePassword Boolean  @default(false)
+  sessionVersion     Int      @default(0)
   createdAt          DateTime @default(now())
 
   department       Department?            @relation(fields: [departmentId], references: [id])
@@ -224,6 +225,7 @@ model Audit {
 
   @@index([areaId, scheduledDate])
   @@index([auditorId, status])
+  @@unique([scheduleId, scheduledDate])
 }
 
 model AuditScore {
@@ -338,6 +340,7 @@ model Notification {
   auditId   String?
   title     String
   body      String?
+  dedupeKey String?          @unique
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
 
@@ -350,4 +353,13 @@ model Notification {
 model Counter {
   key   String @id // contoh: "SF-2026", "5S-2026"
   value Int    @default(0)
+}
+
+model LoginThrottle {
+  key       String   @id
+  count     Int
+  expiresAt DateTime
+  updatedAt DateTime @updatedAt
+
+  @@index([expiresAt])
 }

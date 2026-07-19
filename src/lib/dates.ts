@@ -37,6 +37,22 @@ export function wibDayStart(s: string): Date {
   return new Date(s + "T00:00:00+07:00");
 }
 
+/** Momen 00:00 WIB setelah tanggal DATE berakhir. */
+export function endOfDueDayWib(date: Date | string): Date {
+  const due = new Date(date);
+  const dateOnly = due.toISOString().slice(0, 10);
+  const nextDate = addDays(parseDateOnly(dateOnly), 1).toISOString().slice(0, 10);
+  return wibDayStart(nextDate);
+}
+
+export function closedOnOrBeforeDueDayWib(
+  dueDate: Date | string | null,
+  closedAt: Date | string | null,
+): boolean {
+  if (!dueDate || !closedAt) return false;
+  return new Date(closedAt) < endOfDueDayWib(dueDate);
+}
+
 export function addDays(d: Date, days: number): Date {
   const x = new Date(d);
   x.setUTCDate(x.getUTCDate() + days);

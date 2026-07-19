@@ -17,7 +17,7 @@ export default async function AuditHasilPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const { id } = await params;
 
   const audit = await prisma.audit.findUnique({
@@ -31,6 +31,7 @@ export default async function AuditHasilPage({
     },
   });
   if (!audit || audit.status !== "SUBMITTED") notFound();
+  if (!(user.role === "ADMIN" || audit.auditorId === user.id || (user.role === "SUPERVISOR" && user.departmentId === audit.area.departmentId))) notFound();
 
   // Skor rata-rata per pilar (skala 0..4 → persen)
   const perPillar = PILLAR_ORDER.map((p) => {

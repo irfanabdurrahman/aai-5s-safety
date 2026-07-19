@@ -6,8 +6,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import type { ActionState } from "@/actions/auth";
+import { generateTemporaryPassword } from "@/lib/password";
 
-const DEFAULT_PASSWORD = "akebono123";
+export type TemporaryPasswordState = ActionState & { temporaryPassword?: string };
 
 // ------------------------------------------------------------
 // Pengguna
@@ -27,7 +28,7 @@ const userSchema = z.object({
 export async function createUser(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<TemporaryPasswordState> {
   await requireUser(["ADMIN"]);
   const parsed = userSchema.safeParse({
     npk: formData.get("npk"),
@@ -41,15 +42,16 @@ export async function createUser(
     return { error: `NPK ${parsed.data.npk} sudah terdaftar` };
   }
 
+  const temporaryPassword = generateTemporaryPassword();
   await prisma.user.create({
     data: {
       ...parsed.data,
-      passwordHash: await bcrypt.hash(DEFAULT_PASSWORD, 10),
+      passwordHash: await bcrypt.hash(temporaryPassword, 12),
       mustChangePassword: true,
     },
   });
   revalidatePath("/admin/pengguna");
-  return { ok: true };
+  return { ok: true, temporaryPassword };
 }
 
 export async function updateUser(
@@ -69,7 +71,21 @@ export async function updateUser(
   if (id === admin.id && parsed.data.role !== "ADMIN") {
     return { error: "Tidak bisa menurunkan role akun sendiri" };
   }
-  await prisma.user.update({ where: { id }, data: parsed.data });
+  const existing = await prisma.user.findUnique({
+    where: { id },
+    select: { role: true, departmentId: true },
+  });
+  if (!existing) return { error: "Pengguna tidak ditemukan" };
+  const securityContextChanged =
+    existing.role !== parsed.data.role ||
+    existing.departmentId !== parsed.data.departmentId;
+  await prisma.user.update({
+    where: { id },
+    data: {
+      ...parsed.data,
+      ...(securityContextChanged ? { sessionVersion: { increment: 1 } } : {}),
+    },
+  });
   revalidatePath("/admin/pengguna");
   return { ok: true };
 }
@@ -79,25 +95,35 @@ export async function toggleUserActive(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (id === admin.id) return;
   const user = await prisma.user.findUnique({ where: { id } });
-  if (!user) return;
+  if (!user || !user.isActive) return;
   await prisma.user.update({
     where: { id },
-    data: { isActive: !user.isActive },
+    data: {
+      isActive: false,
+      sessionVersion: { increment: 1 },
+    },
   });
   revalidatePath("/admin/pengguna");
 }
 
-export async function resetPassword(formData: FormData) {
+export async function resetPassword(
+  _prev: TemporaryPasswordState,
+  formData: FormData,
+): Promise<TemporaryPasswordState> {
   await requireUser(["ADMIN"]);
   const id = String(formData.get("id") || "");
+  const temporaryPassword = generateTemporaryPassword();
   await prisma.user.update({
     where: { id },
     data: {
-      passwordHash: await bcrypt.hash(DEFAULT_PASSWORD, 10),
+      isActive: true,
+      passwordHash: await bcrypt.hash(temporaryPassword, 12),
       mustChangePassword: true,
+      sessionVersion: { increment: 1 },
     },
   });
   revalidatePath("/admin/pengguna");
+  return { ok: true, temporaryPassword };
 }
 
 // ------------------------------------------------------------

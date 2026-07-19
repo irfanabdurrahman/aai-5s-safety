@@ -7,6 +7,7 @@ import {
   IconChart,
   IconTrophy,
   IconChecklist,
+  IconTv,
   IconBuilding,
 } from "@/components/icons";
 import type { NavItem } from "./nav-items";
@@ -20,6 +21,7 @@ const MAP = {
   chart: IconChart,
   trophy: IconTrophy,
   checklist: IconChecklist,
+  tv: IconTv,
   building: IconBuilding,
 } as const;
 

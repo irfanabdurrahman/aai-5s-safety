@@ -1,6 +1,10 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { wibDayStart, wibTodayStr } from "@/lib/dates";
+import {
+  closedOnOrBeforeDueDayWib,
+  wibDayStart,
+  wibTodayStr,
+} from "@/lib/dates";
 
 export type Period = "month" | "all";
 
@@ -83,9 +87,7 @@ export async function getDepartmentRanking() {
   for (const f of closedWithDue) {
     const e = dueByArea.get(f.areaId) ?? { total: 0, onTime: 0 };
     e.total++;
-    if (f.closedAt && f.dueDate && f.closedAt <= addDays(f.dueDate, 1)) {
-      e.onTime++;
-    }
+    if (closedOnOrBeforeDueDayWib(f.dueDate, f.closedAt)) e.onTime++;
     dueByArea.set(f.areaId, e);
   }
 
@@ -127,10 +129,4 @@ export async function getDepartmentRanking() {
     });
   }
   return rows.sort((a, b) => b.composite - a.composite);
-}
-
-function addDays(d: Date, days: number) {
-  const x = new Date(d);
-  x.setUTCDate(x.getUTCDate() + days);
-  return x;
 }

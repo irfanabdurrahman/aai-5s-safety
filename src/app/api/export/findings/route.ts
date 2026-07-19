@@ -24,6 +24,10 @@ export async function GET(request: NextRequest) {
 
   const sp = request.nextUrl.searchParams;
   const where: Prisma.FindingWhereInput = {};
+  if (user.role === "SUPERVISOR") {
+    if (!user.departmentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    where.area = { departmentId: user.departmentId };
+  }
   // Batas tanggal mengikuti hari kalender WIB
   if (sp.get("dari")) {
     where.createdAt = { gte: wibDayStart(sp.get("dari")!) };

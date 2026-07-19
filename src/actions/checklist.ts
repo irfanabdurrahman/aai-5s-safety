@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { parseDateOnly } from "@/lib/dates";
 import type { ActionState } from "@/actions/auth";
+import { scheduleSchema, firstOccurrence } from "@/lib/schedule";
 
 const criterionSchema = z.object({
   templateId: z.string().min(1),
@@ -64,15 +65,6 @@ export async function toggleCriterion(formData: FormData) {
 // ------------------------------------------------------------
 // Jadwal audit
 // ------------------------------------------------------------
-const scheduleSchema = z.object({
-  areaId: z.string().min(1, "Pilih area"),
-  auditorId: z.string().min(1, "Pilih auditor"),
-  frequency: z.enum(["WEEKLY", "MONTHLY", "ONCE"]),
-  dayOfWeek: z.coerce.number().int().min(1).max(7).optional(),
-  dayOfMonth: z.coerce.number().int().min(1).max(28).optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Tanggal mulai wajib"),
-});
-
 export async function createSchedule(
   _prev: ActionState,
   formData: FormData,
@@ -95,6 +87,7 @@ export async function createSchedule(
   if (!template) return { error: "Belum ada template checklist aktif" };
 
   const startDate = parseDateOnly(parsed.data.startDate);
+  const firstDate = firstOccurrence(parsed.data);
   const schedule = await prisma.auditSchedule.create({
     data: {
       areaId: parsed.data.areaId,
@@ -116,7 +109,7 @@ export async function createSchedule(
       templateId: schedule.templateId,
       auditorId: schedule.auditorId,
       status: "SCHEDULED",
-      scheduledDate: startDate,
+      scheduledDate: firstDate,
     },
   });
   await prisma.notification.create({
@@ -124,7 +117,7 @@ export async function createSchedule(
       userId: schedule.auditorId,
       type: "AUDIT_DUE",
       title: "Kamu dijadwalkan audit 5S",
-      body: `Mulai ${parsed.data.startDate}`,
+      body: `Mulai ${firstDate.toISOString().slice(0, 10)}`,
       auditId: firstAudit.id,
     },
   });

@@ -85,12 +85,12 @@ export default async function TemuanDetailPage({
     invalidate: finding.status === "OPEN" && canTransition(user, wf, "CLOSED"),
   };
 
-  // Kandidat PIC: PIC Area & Supervisor di departemen area temuan
+  // Backend assignment hanya menerima PIC Area aktif di departemen temuan.
   const picCandidates = can.assign
     ? await prisma.user.findMany({
         where: {
           isActive: true,
-          role: { in: ["PIC_AREA", "SUPERVISOR"] },
+          role: "PIC_AREA",
           departmentId: finding.area.departmentId,
         },
         select: { id: true, name: true, role: true },

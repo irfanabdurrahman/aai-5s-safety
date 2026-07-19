@@ -5,7 +5,7 @@ import { getKpis, getAreaScores } from "@/lib/kpi";
 import { getReporterLeaderboard } from "@/lib/leaderboard";
 
 export async function GET(request: NextRequest) {
-  if (!isTvAuthorized(request.nextUrl.searchParams.get("token"))) {
+  if (!(await isTvAuthorized(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -4,6 +4,14 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { safeReturnUrl } from "@/lib/safe-return";
+import { passwordSchema } from "@/lib/password";
+import {
+  consumeLoginAttempt,
+  resetLoginAttempts,
+} from "@/lib/login-throttle";
+import { clientIpFromHeaders } from "@/lib/login-throttle-policy";
+import { headers } from "next/headers";
 import {
   createSessionCookie,
   destroySessionCookie,
@@ -29,6 +37,12 @@ export async function login(
     return { error: parsed.error.issues[0].message };
   }
 
+  const headerStore = await headers();
+  const ip = clientIpFromHeaders(headerStore);
+  if (!(await consumeLoginAttempt(ip, parsed.data.npk))) {
+    return { error: "NPK atau password salah. Coba lagi nanti." };
+  }
+
   const user = await prisma.user.findUnique({
     where: { npk: parsed.data.npk },
   });
@@ -46,12 +60,13 @@ export async function login(
     name: user.name,
     role: user.role,
     mcp: user.mustChangePassword,
+    sv: user.sessionVersion,
   });
 
-  // Wajib ganti password default sebelum ke mana-mana
+  await resetLoginAttempts(parsed.data.npk);
+  // Wajib ganti password sementara sebelum ke mana-mana
   if (user.mustChangePassword) redirect("/profil");
-  const dest = String(formData.get("return") || "/");
-  redirect(dest.startsWith("/") && !dest.startsWith("//") ? dest : "/");
+  redirect(safeReturnUrl(formData.get("return")));
 }
 
 export async function logout() {
@@ -62,7 +77,7 @@ export async function logout() {
 const changePasswordSchema = z
   .object({
     current: z.string().min(1, "Password lama wajib diisi"),
-    next: z.string().min(6, "Password baru minimal 6 karakter"),
+    next: passwordSchema,
     confirm: z.string(),
   })
   .refine((d) => d.next === d.confirm, {
@@ -74,7 +89,7 @@ export async function changePassword(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireUser();
+  const user = await requireUser(undefined, true);
   const parsed = changePasswordSchema.safeParse({
     current: formData.get("current"),
     next: formData.get("next"),
@@ -87,11 +102,12 @@ export async function changePassword(
   const valid = await bcrypt.compare(parsed.data.current, user.passwordHash);
   if (!valid) return { error: "Password lama salah" };
 
-  await prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id: user.id },
     data: {
-      passwordHash: await bcrypt.hash(parsed.data.next, 10),
+      passwordHash: await bcrypt.hash(parsed.data.next, 12),
       mustChangePassword: false,
+      sessionVersion: { increment: 1 },
     },
   });
   // Terbitkan ulang sesi tanpa flag wajib-ganti-password
@@ -101,6 +117,7 @@ export async function changePassword(
     name: user.name,
     role: user.role,
     mcp: false,
+    sv: updated.sessionVersion,
   });
   return { ok: true };
 }

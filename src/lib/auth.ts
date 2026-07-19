@@ -11,6 +11,7 @@ import {
   type SessionPayload,
 } from "@/lib/session";
 import type { Role } from "@/generated/prisma/enums";
+import { isSessionUserValid } from "@/lib/session-policy";
 
 export async function createSessionCookie(payload: SessionPayload) {
   const token = await signSession(payload);
@@ -45,7 +46,7 @@ export const getCurrentUser = cache(async () => {
     where: { id: session.sub },
     include: { department: true, picAreas: { where: { isActive: true } } },
   });
-  if (!user || !user.isActive) return null;
+  if (!user || !isSessionUserValid(session, user, true)) return null;
   return user;
 });
 
@@ -53,9 +54,10 @@ export type CurrentUser = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>
 
 /** Untuk server component/action: redirect ke login jika belum masuk,
  *  atau ke beranda jika role tidak diizinkan. */
-export async function requireUser(roles?: Role[]): Promise<CurrentUser> {
+export async function requireUser(roles?: Role[], allowPasswordChange = false): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (user.mustChangePassword && !allowPasswordChange) redirect("/profil");
   if (roles && !roles.includes(user.role)) redirect("/");
   return user;
 }

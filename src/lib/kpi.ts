@@ -1,33 +1,54 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { wibToday, wibTodayStr, wibDayStart } from "@/lib/dates";
+import {
+  calculateAuditProgress,
+  calculateDashboardMetrics,
+  createSafetyPulse,
+} from "@/lib/dashboard-metrics";
 
 export async function getKpis() {
   const today = wibToday();
-  // Awal bulan kalender WIB (sebagai momen timestamp)
   const monthStart = wibDayStart(wibTodayStr().slice(0, 8) + "01");
+  const valid = { isValid: true } as const;
 
   const [open, inProgress, pending, closedThisMonth, overdue, closedAll] =
     await Promise.all([
-      prisma.finding.count({ where: { status: "OPEN" } }),
-      prisma.finding.count({ where: { status: "IN_PROGRESS" } }),
-      prisma.finding.count({ where: { status: "PENDING_VERIFICATION" } }),
+      prisma.finding.count({ where: { ...valid, status: "OPEN" } }),
+      prisma.finding.count({ where: { ...valid, status: "IN_PROGRESS" } }),
       prisma.finding.count({
-        where: { status: "CLOSED", closedAt: { gte: monthStart } },
+        where: { ...valid, status: "PENDING_VERIFICATION" },
       }),
       prisma.finding.count({
-        where: { status: { not: "CLOSED" }, dueDate: { lt: today } },
+        where: {
+          ...valid,
+          status: "CLOSED",
+          closedAt: { gte: monthStart },
+        },
+      }),
+      prisma.finding.count({
+        where: {
+          ...valid,
+          status: { not: "CLOSED" },
+          dueDate: { lt: today },
+        },
       }),
       prisma.finding.findMany({
-        where: { status: "CLOSED", closedAt: { gte: monthStart } },
+        where: {
+          ...valid,
+          status: "CLOSED",
+          closedAt: { gte: monthStart },
+        },
         select: { createdAt: true, closedAt: true },
       }),
     ]);
 
   const avgCloseDays = closedAll.length
     ? closedAll.reduce(
-        (s, f) =>
-          s + (f.closedAt!.getTime() - f.createdAt.getTime()) / 86400000,
+        (sum, finding) =>
+          sum +
+          (finding.closedAt!.getTime() - finding.createdAt.getTime()) /
+            86_400_000,
         0,
       ) / closedAll.length
     : null;
@@ -35,50 +56,105 @@ export async function getKpis() {
   return { open, inProgress, pending, closedThisMonth, overdue, avgCloseDays };
 }
 
-/** Tren 8 minggu terakhir: dilaporkan vs selesai per minggu. */
+/** Complete BOD view, derived from persisted findings and this month's audits. */
+export async function getDashboardOverview() {
+  const today = wibToday();
+  const monthStart = new Date(today);
+  monthStart.setUTCDate(1);
+  const nextMonth = new Date(monthStart);
+  nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
+
+  const [findings, audits, activeAreas] = await Promise.all([
+    prisma.finding.findMany({
+      where: { isValid: true },
+      select: {
+        status: true,
+        riskLevel: true,
+        safetyCategory: true,
+        createdAt: true,
+        closedAt: true,
+        dueDate: true,
+        isValid: true,
+      },
+    }),
+    prisma.audit.findMany({
+      where: {
+        scheduleId: { not: null },
+        scheduledDate: { gte: monthStart, lt: nextMonth },
+      },
+      select: { areaId: true, status: true },
+    }),
+    prisma.area.count({ where: { isActive: true } }),
+  ]);
+
+  const findingsMetrics = calculateDashboardMetrics(findings, today);
+  const auditProgress = calculateAuditProgress(audits, activeAreas);
+
+  return {
+    ...findingsMetrics,
+    auditProgress,
+    safetyPulse: createSafetyPulse({
+      active: findingsMetrics.active,
+      criticalActive: findingsMetrics.criticalActive,
+      overdueCritical: findingsMetrics.overdueCritical,
+      onTimeRate: findingsMetrics.onTimeRate,
+      auditCompletionRate: auditProgress.completionRate,
+    }),
+  };
+}
+
+/** Tren 8 minggu terakhir: temuan valid dilaporkan vs selesai per minggu. */
 export async function getWeeklyTrend() {
   const today = wibToday();
-  // Senin minggu WIB berjalan (ISO: Senin=0 offset), lalu 7 minggu ke belakang
   const start = new Date(today);
   start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7) - 7 * 7);
 
   const [reported, closed] = await Promise.all([
     prisma.finding.findMany({
-      where: { createdAt: { gte: start } },
+      where: { isValid: true, createdAt: { gte: start } },
       select: { createdAt: true },
     }),
     prisma.finding.findMany({
-      where: { closedAt: { gte: start } },
+      where: {
+        isValid: true,
+        status: "CLOSED",
+        closedAt: { gte: start },
+      },
       select: { closedAt: true },
     }),
   ]);
 
   const weeks: { label: string; start: Date; reported: number; closed: number }[] =
     [];
-  for (let i = 0; i < 8; i++) {
-    const ws = new Date(start);
-    ws.setUTCDate(ws.getUTCDate() + i * 7);
+  for (let index = 0; index < 8; index++) {
+    const weekStart = new Date(start);
+    weekStart.setUTCDate(weekStart.getUTCDate() + index * 7);
     weeks.push({
-      label: ws.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
-      start: ws,
+      label: weekStart.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+      }),
+      start: weekStart,
       reported: 0,
       closed: 0,
     });
   }
-  const weekIndex = (d: Date) =>
-    Math.floor((d.getTime() - start.getTime()) / (7 * 86400000));
-  for (const f of reported) {
-    const i = weekIndex(f.createdAt);
-    if (i >= 0 && i < 8) weeks[i].reported++;
+
+  const weekIndex = (date: Date) =>
+    Math.floor((date.getTime() - start.getTime()) / (7 * 86_400_000));
+  for (const finding of reported) {
+    const index = weekIndex(finding.createdAt);
+    if (index >= 0 && index < 8) weeks[index].reported++;
   }
-  for (const f of closed) {
-    const i = weekIndex(f.closedAt!);
-    if (i >= 0 && i < 8) weeks[i].closed++;
+  for (const finding of closed) {
+    const index = weekIndex(finding.closedAt!);
+    if (index >= 0 && index < 8) weeks[index].closed++;
   }
-  return weeks.map(({ label, reported, closed }) => ({
+
+  return weeks.map(({ label, reported: reportedCount, closed: closedCount }) => ({
     label,
-    Dilaporkan: reported,
-    Selesai: closed,
+    Dilaporkan: reportedCount,
+    Selesai: closedCount,
   }));
 }
 
@@ -99,24 +175,29 @@ export async function getAreaScores() {
     },
     orderBy: { name: "asc" },
   });
+
   return areas
-    .map((a) => ({
-      id: a.id,
-      name: a.name,
-      departmentCode: a.department.code,
-      score: a.audits[0]?.totalScore ?? null,
-      prevScore: a.audits[1]?.totalScore ?? null,
-      lastAuditAt: a.audits[0]?.submittedAt ?? null,
+    .map((area) => ({
+      id: area.id,
+      name: area.name,
+      departmentCode: area.department.code,
+      score: area.audits[0]?.totalScore ?? null,
+      prevScore: area.audits[1]?.totalScore ?? null,
+      lastAuditAt: area.audits[0]?.submittedAt ?? null,
     }))
-    .sort((x, y) => (y.score ?? -1) - (x.score ?? -1));
+    .sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 }
 
-/** Temuan overdue ≥3 hari — perlu eskalasi. */
+/** Temuan kritis aktif yang sudah melewati target, paling lama dahulu. */
 export async function getEscalations() {
-  const cutoff = wibToday();
-  cutoff.setUTCDate(cutoff.getUTCDate() - 3);
-  return prisma.finding.findMany({
-    where: { status: { not: "CLOSED" }, dueDate: { lt: cutoff } },
+  const today = wibToday();
+  const findings = await prisma.finding.findMany({
+    where: {
+      isValid: true,
+      riskLevel: "CRITICAL",
+      status: { not: "CLOSED" },
+      dueDate: { lt: today },
+    },
     orderBy: { dueDate: "asc" },
     take: 10,
     select: {
@@ -129,4 +210,11 @@ export async function getEscalations() {
       pic: { select: { name: true } },
     },
   });
+
+  return findings.map((finding) => ({
+    ...finding,
+    daysOverdue: Math.floor(
+      (today.getTime() - finding.dueDate!.getTime()) / 86_400_000,
+    ),
+  }));
 }

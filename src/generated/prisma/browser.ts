@@ -92,3 +92,8 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type Counter = Prisma.CounterModel
+/**
+ * Model LoginThrottle
+ *
+ */
+export type LoginThrottle = Prisma.LoginThrottleModel

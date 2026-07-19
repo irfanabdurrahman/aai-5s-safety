@@ -453,14 +453,6 @@ export type EnumFiveSPillarFieldUpdateOperationsInput = {
   set?: $Enums.FiveSPillar
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type ChecklistCriterionCreateNestedOneWithoutScoresInput = {
   create?: Prisma.XOR<Prisma.ChecklistCriterionCreateWithoutScoresInput, Prisma.ChecklistCriterionUncheckedCreateWithoutScoresInput>
   connectOrCreate?: Prisma.ChecklistCriterionCreateOrConnectWithoutScoresInput

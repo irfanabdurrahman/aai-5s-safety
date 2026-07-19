@@ -8,6 +8,7 @@ import {
   toDateStr,
 } from "@/lib/dates";
 import type { NotificationType } from "@/generated/prisma/enums";
+import { cleanupExpiredLoginAttempts } from "@/lib/login-throttle";
 
 /** Materialisasi audit dari jadwal untuk hari (kalender WIB) ini. */
 export async function materializeAudits() {
@@ -35,42 +36,53 @@ export async function materializeAudits() {
       if (anyAudit) continue;
     }
 
-    const exists = await prisma.audit.findFirst({
-      where: { scheduleId: s.id, scheduledDate: today },
-      select: { id: true },
-    });
-    if (exists) continue;
+    // Unique(scheduleId, scheduledDate) + transaction lock makes materialization
+    // idempotent across replicas, including its notification side effect.
+    const inserted = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`${s.id}:${toDateStr(today)}`}))`;
+      const exists = await tx.audit.findUnique({
+        where: {
+          scheduleId_scheduledDate: {
+            scheduleId: s.id,
+            scheduledDate: today,
+          },
+        },
+        select: { id: true },
+      });
+      if (exists) return false;
 
-    const audit = await prisma.audit.create({
-      data: {
-        scheduleId: s.id,
-        areaId: s.areaId,
-        templateId: s.templateId,
-        auditorId: s.auditorId,
-        status: "SCHEDULED",
-        scheduledDate: today,
-      },
+      const audit = await tx.audit.create({
+        data: {
+          scheduleId: s.id,
+          areaId: s.areaId,
+          templateId: s.templateId,
+          auditorId: s.auditorId,
+          status: "SCHEDULED",
+          scheduledDate: today,
+        },
+      });
+      await tx.notification.create({
+        data: {
+          userId: s.auditorId,
+          type: "AUDIT_DUE",
+          title: "Audit 5S hari ini — jangan lupa dikerjakan",
+          auditId: audit.id,
+        },
+      });
+      return true;
     });
-    await prisma.notification.create({
-      data: {
-        userId: s.auditorId,
-        type: "AUDIT_DUE",
-        title: "Audit 5S hari ini — jangan lupa dikerjakan",
-        auditId: audit.id,
-      },
-    });
-    created++;
+    if (inserted) created++;
   }
   return created;
 }
 
 /** Notifikasi H-1, overdue, dan eskalasi ≥3 hari.
- *  Dedup harian dilakukan sekali di depan (bukan query per notifikasi). */
+ *  Unique dedupeKey tanggal-WIB membuat insert idempotent antar replica. */
 export async function sendDueNotifications() {
   const today = wibToday();
   const tomorrow = addDays(today, 1);
 
-  const [dueSoon, overdue, admins, supervisors, sentToday] = await Promise.all([
+  const [dueSoon, overdue, admins, supervisors] = await Promise.all([
     prisma.finding.findMany({
       where: {
         status: { in: ["OPEN", "IN_PROGRESS"] },
@@ -96,15 +108,6 @@ export async function sendDueNotifications() {
       where: { isActive: true, role: "SUPERVISOR" },
       select: { id: true, departmentId: true },
     }),
-    prisma.notification.findMany({
-      where: {
-        createdAt: { gte: addDays(new Date(), -1) },
-        type: {
-          in: ["FINDING_DUE_SOON", "FINDING_OVERDUE", "FINDING_ESCALATED"],
-        },
-      },
-      select: { userId: true, type: true, findingId: true },
-    }),
   ]);
 
   const spvByDept = new Map<string, string[]>();
@@ -115,16 +118,15 @@ export async function sendDueNotifications() {
       s.id,
     ]);
   }
-  const already = new Set(
-    sentToday.map((n) => `${n.userId}:${n.type}:${n.findingId ?? ""}`),
-  );
-
   const toCreate: {
     userId: string;
     type: NotificationType;
     title: string;
     findingId: string;
+    dedupeKey: string;
   }[] = [];
+  const already = new Set<string>();
+  const dateKey = toDateStr(today);
   const push = (
     userId: string | null,
     type: NotificationType,
@@ -132,10 +134,10 @@ export async function sendDueNotifications() {
     findingId: string,
   ) => {
     if (!userId) return;
-    const key = `${userId}:${type}:${findingId}`;
+    const key = `${dateKey}:${userId}:${type}:${findingId}`;
     if (already.has(key)) return;
     already.add(key);
-    toCreate.push({ userId, type, title, findingId });
+    toCreate.push({ userId, type, title, findingId, dedupeKey: key });
   };
 
   for (const f of dueSoon) {
@@ -162,17 +164,21 @@ export async function sendDueNotifications() {
     }
   }
 
-  if (toCreate.length) {
-    await prisma.notification.createMany({ data: toCreate });
-  }
+  const notified = toCreate.length
+    ? (await prisma.notification.createMany({
+        data: toCreate,
+        skipDuplicates: true,
+      })).count
+    : 0;
   return {
     dueSoon: dueSoon.length,
     overdue: overdue.length,
-    notified: toCreate.length,
+    notified,
   };
 }
 
 export async function runDailyJobs() {
+  await cleanupExpiredLoginAttempts();
   const audits = await materializeAudits();
   const notif = await sendDueNotifications();
   return { auditsCreated: audits, ...notif, ranAt: new Date().toISOString() };

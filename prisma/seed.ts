@@ -9,10 +9,18 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 });
 
-const DEFAULT_PASSWORD = "akebono123";
+function requireSeedPassword(): string {
+  const value = process.env.SEED_PASSWORD;
+  if (!value || value.length < 12) {
+    throw new Error("SEED_PASSWORD minimal 12 karakter wajib diisi untuk menjalankan seed");
+  }
+  return value;
+}
+
+const seedPassword = requireSeedPassword();
 
 async function main() {
-  const hash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+  const hash = await bcrypt.hash(seedPassword, 12);
 
   const departments = [
     { code: "DISC", name: "Produksi Disc Brake" },
@@ -141,7 +149,7 @@ async function main() {
     console.log("Template checklist 5S dibuat (25 kriteria).");
   }
 
-  console.log("Seed minimal selesai. Password semua akun:", DEFAULT_PASSWORD);
+  console.log("Seed minimal selesai. Password seed tidak ditampilkan.");
 }
 
 main().finally(() => prisma.$disconnect());

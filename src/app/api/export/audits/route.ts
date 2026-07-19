@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   const audits = await prisma.audit.findMany({
-    where: { status: "SUBMITTED" },
+    where: { status: "SUBMITTED", ...(user.role === "SUPERVISOR" ? { area: { departmentId: user.departmentId! } } : {}) },
     orderBy: { submittedAt: "asc" },
     include: {
       area: { include: { department: true } },

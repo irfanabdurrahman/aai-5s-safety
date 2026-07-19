@@ -54,7 +54,11 @@ async function main() {
     return;
   }
 
-  const hash = await bcrypt.hash("akebono123", 10);
+  const seedPassword = process.env.SEED_PASSWORD;
+  if (!seedPassword || seedPassword.length < 12) {
+    throw new Error("SEED_PASSWORD minimal 12 karakter wajib diisi untuk seed demo");
+  }
+  const hash = await bcrypt.hash(seedPassword, 12);
   const dept = Object.fromEntries(
     (await prisma.department.findMany()).map((d) => [d.code, d]),
   );

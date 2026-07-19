@@ -398,7 +398,8 @@ export const ModelName = {
   FindingStatusHistory: 'FindingStatusHistory',
   Comment: 'Comment',
   Notification: 'Notification',
-  Counter: 'Counter'
+  Counter: 'Counter',
+  LoginThrottle: 'LoginThrottle'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "department" | "area" | "line" | "user" | "checklistTemplate" | "checklistCriterion" | "auditSchedule" | "audit" | "auditScore" | "finding" | "findingPhoto" | "findingStatusHistory" | "comment" | "notification" | "counter"
+    modelProps: "department" | "area" | "line" | "user" | "checklistTemplate" | "checklistCriterion" | "auditSchedule" | "audit" | "auditScore" | "finding" | "findingPhoto" | "findingStatusHistory" | "comment" | "notification" | "counter" | "loginThrottle"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1528,6 +1529,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LoginThrottle: {
+      payload: Prisma.$LoginThrottlePayload<ExtArgs>
+      fields: Prisma.LoginThrottleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LoginThrottleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LoginThrottleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>
+        }
+        findFirst: {
+          args: Prisma.LoginThrottleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LoginThrottleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>
+        }
+        findMany: {
+          args: Prisma.LoginThrottleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>[]
+        }
+        create: {
+          args: Prisma.LoginThrottleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>
+        }
+        createMany: {
+          args: Prisma.LoginThrottleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LoginThrottleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>[]
+        }
+        delete: {
+          args: Prisma.LoginThrottleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>
+        }
+        update: {
+          args: Prisma.LoginThrottleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>
+        }
+        deleteMany: {
+          args: Prisma.LoginThrottleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LoginThrottleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LoginThrottleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>[]
+        }
+        upsert: {
+          args: Prisma.LoginThrottleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginThrottlePayload>
+        }
+        aggregate: {
+          args: Prisma.LoginThrottleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLoginThrottle>
+        }
+        groupBy: {
+          args: Prisma.LoginThrottleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoginThrottleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LoginThrottleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoginThrottleCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1608,6 +1683,7 @@ export const UserScalarFieldEnum = {
   departmentId: 'departmentId',
   isActive: 'isActive',
   mustChangePassword: 'mustChangePassword',
+  sessionVersion: 'sessionVersion',
   createdAt: 'createdAt'
 } as const
 
@@ -1753,6 +1829,7 @@ export const NotificationScalarFieldEnum = {
   auditId: 'auditId',
   title: 'title',
   body: 'body',
+  dedupeKey: 'dedupeKey',
   isRead: 'isRead',
   createdAt: 'createdAt'
 } as const
@@ -1766,6 +1843,16 @@ export const CounterScalarFieldEnum = {
 } as const
 
 export type CounterScalarFieldEnum = (typeof CounterScalarFieldEnum)[keyof typeof CounterScalarFieldEnum]
+
+
+export const LoginThrottleScalarFieldEnum = {
+  key: 'key',
+  count: 'count',
+  expiresAt: 'expiresAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LoginThrottleScalarFieldEnum = (typeof LoginThrottleScalarFieldEnum)[keyof typeof LoginThrottleScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1834,6 +1921,20 @@ export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -1858,20 +1959,6 @@ export type EnumFiveSPillarFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'FiveSPillar[]'
  */
 export type ListEnumFiveSPillarFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FiveSPillar[]'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -2125,6 +2212,7 @@ export type GlobalOmitConfig = {
   comment?: Prisma.CommentOmit
   notification?: Prisma.NotificationOmit
   counter?: Prisma.CounterOmit
+  loginThrottle?: Prisma.LoginThrottleOmit
 }
 
 /* Types for Logging */
