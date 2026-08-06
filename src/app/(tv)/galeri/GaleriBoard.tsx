@@ -527,7 +527,7 @@ export function GaleriBoard() {
         </div>
       )}
 
-      {!filtered.length ? (
+      {!data || !filtered.length ? (
         <div className="flex flex-1 items-center justify-center p-8 text-center">
           <div className="rounded-2xl border-2 border-dashed border-[#6478b4] bg-[#25325c] p-10">
             <p className="text-4xl" aria-hidden="true">▧</p>
