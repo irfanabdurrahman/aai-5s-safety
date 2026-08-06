@@ -17,6 +17,14 @@ import {
   type DepartmentStanding,
   type ReporterStanding,
 } from "@/lib/live-wall";
+import {
+  addDays,
+  parseDateOnly,
+  toDateStr,
+  wibDayStart,
+  wibDow,
+  wibTodayStr,
+} from "@/lib/dates";
 
 const SCENE_MS = 12_000;
 
@@ -88,6 +96,38 @@ const CATEGORY: Record<string, string> = {
   SEIKETSU: "Rawat",
   SHITSUKE: "Rajin",
 };
+
+type StatusFilterKey =
+  | "OPEN"
+  | "IN_PROGRESS"
+  | "PENDING_VERIFICATION"
+  | "CLOSED"
+  | null;
+type PeriodFilterKey = "week" | "month" | "year" | null;
+
+const STATUS_FILTERS: { key: StatusFilterKey; label: string }[] = [
+  { key: null, label: "Semua" },
+  { key: "OPEN", label: "Terbuka" },
+  { key: "IN_PROGRESS", label: "Dikerjakan" },
+  { key: "PENDING_VERIFICATION", label: "Verifikasi" },
+  { key: "CLOSED", label: "Selesai" },
+];
+
+const PERIOD_FILTERS: { key: PeriodFilterKey; label: string }[] = [
+  { key: null, label: "Semua Waktu" },
+  { key: "week", label: "Minggu Ini" },
+  { key: "month", label: "Bulan Ini" },
+  { key: "year", label: "Tahun Ini" },
+];
+
+/** Batas awal periode (00:00 WIB): minggu berjalan mulai Senin. */
+function periodStart(period: PeriodFilterKey): Date | null {
+  if (!period) return null;
+  const today = wibTodayStr();
+  if (period === "year") return wibDayStart(`${today.slice(0, 4)}-01-01`);
+  if (period === "month") return wibDayStart(`${today.slice(0, 8)}01`);
+  return wibDayStart(toDateStr(addDays(parseDateOnly(today), -(wibDow() - 1))));
+}
 
 function useSceneSize() {
   const [size, setSize] = useState(2);
@@ -291,6 +331,23 @@ function HeaderLeaderboard({ data }: { data: LiveWallResponse["leaderboard"] | n
   );
 }
 
+function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`h-9 rounded-full border px-3 text-[11px] font-black transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 ${
+        active
+          ? "border-cyan-300 bg-cyan-400 text-slate-950"
+          : "border-[#65749f] bg-[#26345d] text-white hover:bg-[#344572]"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function ControlButton({ label, onClick, children, pressed }: { label: string; onClick: () => void; children: React.ReactNode; pressed?: boolean }) {
   return (
     <button
@@ -319,9 +376,20 @@ export function GaleriBoard() {
   const startedAt = useRef(0);
   const progressRef = useRef(0);
 
+  const [statusFilter, setStatusFilter] = useState<StatusFilterKey>(null);
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilterKey>(null);
+
+  const filtered = useMemo(() => {
+    let list = data?.findings ?? [];
+    if (statusFilter) list = list.filter((item) => item.status === statusFilter);
+    const start = periodStart(periodFilter);
+    if (start) list = list.filter((item) => new Date(item.createdAt) >= start);
+    return list;
+  }, [data?.findings, statusFilter, periodFilter]);
+
   const scenes = useMemo(
-    () => chunkLiveWall(sortLiveWall(data?.findings ?? []), sceneSize),
-    [data?.findings, sceneSize],
+    () => chunkLiveWall(sortLiveWall(filtered), sceneSize),
+    [filtered, sceneSize],
   );
   const sceneCount = Math.max(scenes.length, 1);
   const activeSceneIndex = sceneIndex % sceneCount;
@@ -335,6 +403,14 @@ export function GaleriBoard() {
     progressRef.current = 0;
     setProgress(0);
   }, [sceneCount]);
+
+  // Ganti filter → mulai lagi dari scene pertama
+  useEffect(() => {
+    setSceneIndex(0);
+    startedAt.current = 0;
+    progressRef.current = 0;
+    setProgress(0);
+  }, [statusFilter, periodFilter]);
 
   useEffect(() => {
     let active = true;
@@ -434,7 +510,9 @@ export function GaleriBoard() {
         <div className="min-w-0 shrink-0">
           <h1 className="truncate text-base font-black tracking-tight sm:text-xl">Safety &amp; 5S Live Wall</h1>
           <p className="truncate text-[10px] font-semibold text-slate-300 sm:text-xs">
-            {data?.findings.length ?? 0} temuan valid · Diperbarui {data?.generatedAt ? new Date(data.generatedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" }) : "—"} WIB
+            {statusFilter || periodFilter
+              ? `${filtered.length} dari ${data?.findings.length ?? 0} temuan`
+              : `${data?.findings.length ?? 0} temuan valid`} · Diperbarui {data?.generatedAt ? new Date(data.generatedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" }) : "—"} WIB
           </p>
         </div>
         <HeaderLeaderboard data={data?.leaderboard ?? null} />
@@ -449,11 +527,15 @@ export function GaleriBoard() {
         </div>
       )}
 
-      {!data?.findings.length ? (
+      {!filtered.length ? (
         <div className="flex flex-1 items-center justify-center p-8 text-center">
           <div className="rounded-2xl border-2 border-dashed border-[#6478b4] bg-[#25325c] p-10">
             <p className="text-4xl" aria-hidden="true">▧</p>
-            <p className="mt-3 font-black">Belum ada temuan valid.</p>
+            <p className="mt-3 font-black">
+              {statusFilter || periodFilter
+                ? "Tidak ada temuan yang cocok dengan filter."
+                : "Belum ada temuan valid."}
+            </p>
           </div>
         </div>
       ) : (
@@ -482,6 +564,30 @@ export function GaleriBoard() {
       )}
 
       <footer className="shrink-0 border-t-2 border-[#3d4d7e] bg-[#141d3d] px-3 py-2 sm:px-5">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter status temuan">
+            <span className="mr-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Status</span>
+            {STATUS_FILTERS.map((option) => (
+              <FilterPill
+                key={option.label}
+                label={option.label}
+                active={statusFilter === option.key}
+                onClick={() => setStatusFilter(option.key)}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter rentang waktu">
+            <span className="mr-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Waktu</span>
+            {PERIOD_FILTERS.map((option) => (
+              <FilterPill
+                key={option.label}
+                label={option.label}
+                active={periodFilter === option.key}
+                onClick={() => setPeriodFilter(option.key)}
+              />
+            ))}
+          </div>
+        </div>
         <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-[#344267]" role="progressbar" aria-label="Waktu menuju scene berikutnya" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
           <div className="h-full bg-cyan-400 motion-safe:transition-[width]" style={{ width: `${progress * 100}%` }} />
         </div>
