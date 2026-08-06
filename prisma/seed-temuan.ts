@@ -174,8 +174,14 @@ async function main() {
     });
   }
 
-  items.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
-  console.log(`Total item diimport: ${items.length}`);
+  // Hanya import temuan yang punya foto di data sumber (permintaan user:
+  // temuan tanpa foto tidak usah ditampilkan sama sekali).
+  const tanpaFoto = items.filter((it) => it.photos.length === 0).length;
+  const bersumberFoto = items.filter((it) => it.photos.length > 0);
+  bersumberFoto.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  console.log(
+    `Total item diimport: ${bersumberFoto.length} (dilewati tanpa foto: ${tanpaFoto})`,
+  );
 
   // ---- 3. Import ----
   let counter = 0;
@@ -184,7 +190,7 @@ async function main() {
   const unmapped: string[] = [];
   const cutoff = "2026-07-15"; // >= ini dianggap "baru", status divariasikan
 
-  for (const [i, it] of items.entries()) {
+  for (const [i, it] of bersumberFoto.entries()) {
     const area = areaByCode.get(mapArea(it.areaText));
     if (!area) {
       unmapped.push(it.areaText.slice(0, 80));
