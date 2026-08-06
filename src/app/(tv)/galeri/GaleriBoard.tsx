@@ -188,11 +188,19 @@ function FindingCard({
   const location = [finding.area.name, finding.line?.name, finding.locationDetail]
     .filter(Boolean)
     .join(" · ");
+  const hasPhoto = finding.photos.length > 0;
+  const descriptionClamp = hasPhoto
+    ? compact
+      ? "line-clamp-2 text-xs"
+      : "line-clamp-4 text-sm"
+    : compact
+      ? "line-clamp-6 text-xs"
+      : "line-clamp-[10] text-sm";
 
   return (
-    <article className={`grid min-h-0 overflow-hidden rounded-xl border-2 border-[#43527f] bg-[#1d2748] shadow-[0_10px_28px_rgba(3,8,25,0.35)] ${compact ? "grid-rows-[minmax(0,0.8fr)_minmax(0,1.2fr)]" : "grid-rows-[minmax(0,1.2fr)_minmax(0,1fr)]"}`}>
-      <FindingImage finding={finding} />
-      <div className={`flex min-h-0 flex-col border-t-2 border-[#43527f] text-slate-100 ${compact ? "gap-1 p-2" : "gap-1.5 p-3"}`}>
+    <article className={`grid min-h-0 overflow-hidden rounded-xl border-2 border-[#43527f] bg-[#1d2748] shadow-[0_10px_28px_rgba(3,8,25,0.35)] ${!hasPhoto ? "grid-rows-[minmax(0,1fr)]" : compact ? "grid-rows-[minmax(0,0.8fr)_minmax(0,1.2fr)]" : "grid-rows-[minmax(0,1fr)_minmax(0,1fr)]"}`}>
+      {hasPhoto && <FindingImage finding={finding} />}
+      <div className={`flex min-h-0 flex-col text-slate-100 ${hasPhoto ? "border-t-2 border-[#43527f]" : ""} ${compact ? "gap-1 p-2" : "gap-1.5 p-3"}`}>
         <div className="flex shrink-0 items-center gap-2">
           <span className="min-w-0 flex-1 truncate text-xs font-black tracking-wide text-cyan-200">
             {finding.number}
@@ -206,7 +214,7 @@ function FindingCard({
             </span>
           )}
         </div>
-        <p className={`${compact ? "line-clamp-1 text-xs" : "line-clamp-2 text-sm"} min-h-0 font-bold leading-snug`}>{finding.description}</p>
+        <p className={`${descriptionClamp} min-h-0 font-bold leading-snug`} title={finding.description}>{finding.description}</p>
         <div className={`mt-auto grid shrink-0 grid-cols-2 gap-x-2 gap-y-1 border-t border-[#43527f] text-slate-300 ${compact ? "pt-1 text-[10px]" : "pt-2 text-[11px]"}`}>
           <p className="truncate" title={location}><span aria-hidden="true">⌖</span> {location || "Lokasi belum diisi"}</p>
           <p className="truncate"><span className="text-slate-400">PIC:</span> {finding.pic?.name ?? "Belum ditugaskan"}</p>
@@ -412,7 +420,7 @@ export function GaleriBoard() {
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-base font-black tracking-tight sm:text-xl">Safety &amp; 5S Live Wall</h1>
           <p className="truncate text-[10px] font-semibold text-slate-300 sm:text-xs">
-            {data?.findings.length ?? 0} temuan valid berfoto · Diperbarui {data?.generatedAt ? new Date(data.generatedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" }) : "—"} WIB
+            {data?.findings.length ?? 0} temuan valid · Diperbarui {data?.generatedAt ? new Date(data.generatedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" }) : "—"} WIB
           </p>
         </div>
         <Link href="/" className="flex h-11 items-center justify-center rounded-lg border border-[#65749f] bg-[#26345d] px-3 text-xs font-black text-white hover:bg-[#344572] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300" aria-label="Keluar dari Live Wall dan kembali ke aplikasi">
@@ -430,7 +438,7 @@ export function GaleriBoard() {
         <div className="flex flex-1 items-center justify-center p-8 text-center">
           <div className="rounded-2xl border-2 border-dashed border-[#53618d] bg-[#1d2748] p-10">
             <p className="text-4xl" aria-hidden="true">▧</p>
-            <p className="mt-3 font-black">Belum ada temuan valid berfoto.</p>
+            <p className="mt-3 font-black">Belum ada temuan valid.</p>
           </div>
         </div>
       ) : (

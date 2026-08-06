@@ -15,9 +15,9 @@ export async function GET(request: NextRequest) {
   const monthStart = wibDayStart(`${wibTodayStr().slice(0, 8)}01`);
   const [findings, monthlyContributions] = await Promise.all([
     prisma.finding.findMany({
-      where: { isValid: true, photos: { some: {} } },
+      where: { isValid: true },
       orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-      take: 72,
+      take: 240,
       select: {
         id: true,
         number: true,
