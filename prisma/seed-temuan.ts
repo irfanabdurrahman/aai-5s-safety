@@ -20,6 +20,14 @@ const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || "./uploads");
 const DATASET_JSON = "/tmp/temuan/dataset/dataset_temuan_safety_5s_2026-01-01_sd_2026-07-31.json";
 const DEMO_JSON = "/tmp/temuan/demo/temuan_safety_data.json";
 const DEMO_PHOTOS = "/tmp/temuan/demo";
+// Foto patrol (foto_url di dataset) diunduh terpisah dari portal internal
+// (lihat data/download-foto-patrol.py), diekstrak ke folder ini:
+const DATASET_PHOTOS = "/tmp/temuan/lph";
+
+/** basename foto_url → nama file lokal hasil downloader (spasi → _) */
+function fotoLokal(fotoUrl: string): string {
+  return path.join(DATASET_PHOTOS, path.basename(fotoUrl.trim()).replace(/ /g, "_"));
+}
 
 const REPORTERS = ["40001", "30001", "20001", "10001"]; // rotasi pelapor
 const PIC_NPK = "30001"; // Agus — PIC Area
@@ -149,7 +157,7 @@ async function main() {
       locationDetail: r.area,
       areaText: `${r.area} ${r.temuan}`,
       actionNote: r.progress_improvement?.trim() || undefined,
-      photos: [],
+      photos: r.foto_url?.trim() ? [fotoLokal(r.foto_url)] : [],
     });
   }
 
@@ -170,10 +178,8 @@ async function main() {
   console.log(`Total item diimport: ${items.length}`);
 
   // ---- 3. Import ----
-  const photoDir = path.join(UPLOAD_DIR, "2026", "07");
-  await fsp.mkdir(photoDir, { recursive: true });
-
   let counter = 0;
+  let missingPhoto = 0;
   let photoCount = 0;
   const unmapped: string[] = [];
   const cutoff = "2026-07-15"; // >= ini dianggap "baru", status divariasikan
@@ -262,16 +268,22 @@ async function main() {
       })),
     });
 
-    // foto
+    // foto — simpan per folder bulan sesuai tanggal temuan
+    const [yyyy, mm] = it.date.split("-");
     for (const src of it.photos) {
-      if (!fs.existsSync(src)) continue;
+      if (!fs.existsSync(src)) {
+        missingPhoto++;
+        continue;
+      }
+      const photoDir = path.join(UPLOAD_DIR, yyyy, mm);
+      await fsp.mkdir(photoDir, { recursive: true });
       const dest = path.join(photoDir, path.basename(src));
       await fsp.copyFile(src, dest);
       await prisma.findingPhoto.create({
         data: {
           findingId: finding.id,
           type: "BEFORE",
-          filePath: `2026/07/${path.basename(src)}`,
+          filePath: `${yyyy}/${mm}/${path.basename(src)}`,
           uploadedById: reporter.id,
           createdAt,
         },
@@ -287,6 +299,10 @@ async function main() {
   });
 
   console.log(`Import selesai: ${counter} temuan, ${photoCount} foto.`);
+  if (missingPhoto)
+    console.log(
+      `PERINGATAN: ${missingPhoto} foto tidak ditemukan di disk (cek ${DATASET_PHOTOS}).`,
+    );
   if (unmapped.length) console.log("GAGAL mapping area:", unmapped);
 }
 
