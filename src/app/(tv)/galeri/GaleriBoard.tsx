@@ -114,16 +114,6 @@ function formatDate(value: string) {
   });
 }
 
-function initials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-}
-
 function slaLabel(finding: GaleriFinding, asOf: string) {
   const state = liveWallSlaState(finding.dueDate, finding.closedAt, asOf);
   if (state === "NO_DUE_DATE") {
@@ -143,36 +133,45 @@ function slaLabel(finding: GaleriFinding, asOf: string) {
 
 function FindingImage({ finding }: { finding: GaleriFinding }) {
   const [failed, setFailed] = useState(false);
+  const [landscape, setLandscape] = useState(false);
   const photo =
     finding.photos.find((entry) => entry.type === "AFTER") ?? finding.photos[0];
 
   if (!photo || failed) {
     return (
-      <div className="flex h-full min-h-32 items-center justify-center bg-[#242d50] px-4 text-center text-sm font-bold text-slate-300">
+      <div className="flex h-full min-h-32 items-center justify-center bg-[#0b1130] px-4 text-center text-sm font-bold text-slate-300">
         <span aria-hidden="true" className="mr-2 text-2xl">▧</span>
         Foto tidak dapat ditampilkan
       </div>
     );
   }
 
+  const url = liveWallPhotoUrl(photo.filePath);
   return (
-    <div className="relative h-full min-h-0 overflow-hidden bg-[#0d1430]">
-      {/* Latar blur dari foto yang sama: mengisi sisi kosong tanpa memotong
-          foto utama (mayoritas foto portrait, kotak kartu landscape). */}
+    <div className="relative h-full min-h-0 overflow-hidden bg-[#0b1130]">
+      {/* Kotak foto berrasio 3:4 (portrait). Foto portrait tampil murni;
+          hanya foto landscape yang diberi latar blur agar tidak terpotong. */}
+      {landscape && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-md"
+          loading="eager"
+        />
+      )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={liveWallPhotoUrl(photo.filePath)}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-md"
-        loading="eager"
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={liveWallPhotoUrl(photo.filePath)}
+        src={url}
         alt={`${photo.type === "AFTER" ? "Foto sesudah perbaikan" : "Foto temuan"} ${finding.number}`}
-        className="relative h-full w-full object-contain"
+        className={`relative h-full w-full ${landscape ? "object-contain" : "object-cover"}`}
         loading="eager"
+        onLoad={(event) =>
+          setLandscape(
+            event.currentTarget.naturalWidth > event.currentTarget.naturalHeight,
+          )
+        }
         onError={() => setFailed(true)}
       />
       <span className="absolute left-2 top-2 rounded-md border border-white/40 bg-slate-950/85 px-2 py-1 text-[10px] font-black tracking-wider text-white">
@@ -199,91 +198,96 @@ function FindingCard({
     .filter(Boolean)
     .join(" · ");
   const hasPhoto = finding.photos.length > 0;
-  const descriptionClamp = hasPhoto
-    ? compact
-      ? "line-clamp-2 text-xs"
-      : "line-clamp-4 text-sm"
-    : compact
-      ? "line-clamp-6 text-xs"
-      : "line-clamp-[10] text-sm";
+  const descriptionClamp = compact
+    ? "line-clamp-4 text-xs"
+    : "line-clamp-[7] text-sm";
 
   return (
-    <article className={`grid min-h-0 overflow-hidden rounded-xl border-2 border-[#43527f] bg-[#1d2748] shadow-[0_10px_28px_rgba(3,8,25,0.35)] ${!hasPhoto ? "grid-rows-[minmax(0,1fr)]" : compact ? "grid-rows-[minmax(0,0.8fr)_minmax(0,1.2fr)]" : "grid-rows-[minmax(0,1fr)_minmax(0,1fr)]"}`}>
-      {hasPhoto && <FindingImage finding={finding} />}
-      <div className={`flex min-h-0 flex-col text-slate-100 ${hasPhoto ? "border-t-2 border-[#43527f]" : ""} ${compact ? "gap-1 p-2" : "gap-1.5 p-3"}`}>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="min-w-0 flex-1 truncate text-xs font-black tracking-wide text-cyan-200">
-            {finding.number}
-          </span>
+    <article className="flex min-h-0 min-w-0 overflow-hidden rounded-xl border-2 border-[#6478b4] bg-gradient-to-b from-[#2b3a6b] to-[#25325c] shadow-[0_14px_32px_rgba(0,0,0,0.55)]">
+      {hasPhoto && (
+        <div className="h-full min-h-0 max-w-[58%] shrink-0 overflow-hidden border-r-2 border-[#6478b4] aspect-[3/4]">
+          <FindingImage finding={finding} />
+        </div>
+      )}
+      <div className={`flex min-h-0 min-w-0 flex-1 flex-col text-slate-100 ${compact ? "gap-1 p-2" : "gap-1.5 p-3"}`}>
+        <span className="shrink-0 truncate text-[13px] font-black tracking-wide text-cyan-200">
+          {finding.number}
+        </span>
+        <div className="flex shrink-0 flex-wrap items-center gap-1.5">
           <span className={`rounded-md border px-2 py-1 text-[10px] font-black ${status.cls}`}>
             {status.label}
           </span>
           {risk && (
-            <span className={`rounded-md border bg-[#131a34] px-2 py-1 text-[10px] font-black ${risk.cls}`}>
+            <span className={`rounded-md border bg-[#182247] px-2 py-1 text-[10px] font-black ${risk.cls}`}>
               {risk.label}
             </span>
           )}
         </div>
         <p className={`${descriptionClamp} min-h-0 font-bold leading-snug`} title={finding.description}>{finding.description}</p>
-        <div className={`mt-auto grid shrink-0 grid-cols-2 gap-x-2 gap-y-1 border-t border-[#43527f] text-slate-300 ${compact ? "pt-1 text-[10px]" : "pt-2 text-[11px]"}`}>
+        <div className={`mt-auto flex shrink-0 flex-col gap-0.5 border-t border-[#5b6ea6] text-slate-300 ${compact ? "pt-1 text-[10px]" : "pt-2 text-[11px]"}`}>
           <p className="truncate" title={location}><span aria-hidden="true">⌖</span> {location || "Lokasi belum diisi"}</p>
           <p className="truncate"><span className="text-slate-400">PIC:</span> {finding.pic?.name ?? "Belum ditugaskan"}</p>
           <p className={`truncate font-bold ${sla.cls}`}>{sla.label}</p>
-          <p className="truncate text-right">{CATEGORY[category ?? ""] ?? category ?? finding.source}</p>
+          <p className="truncate">{CATEGORY[category ?? ""] ?? category ?? finding.source}</p>
         </div>
       </div>
     </article>
   );
 }
 
-function LeaderboardPanel({ data }: { data: LiveWallResponse["leaderboard"] | null }) {
+const MEDALS = ["🥇", "🥈", "🥉"];
+
+function HeaderLeaderboard({ data }: { data: LiveWallResponse["leaderboard"] | null }) {
+  if (!data) return null;
   return (
-    <aside className="max-h-44 min-h-0 overflow-y-auto rounded-xl border-2 border-[#53618d] bg-[#202b50] p-3 text-slate-100 shadow-xl lg:max-h-none lg:p-4">
-      <div className="border-b border-[#53618d] pb-3">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">Kontribusi berkualitas</p>
-        <h2 className="text-lg font-black">Peringkat Bulan Ini</h2>
-        <p className="mt-1 text-[10px] leading-snug text-slate-300">
-          Hanya temuan valid. Poin: +10 kontribusi, +5 selesai, +5 tepat waktu.
-        </p>
-      </div>
-
-      {!data || data.reporters.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-300">Belum ada kontribusi valid bulan ini.</p>
+    <div
+      className="ml-auto hidden min-w-0 items-center gap-2 overflow-hidden lg:flex"
+      aria-label="Peringkat kontributor valid bulan ini"
+      title="Hanya temuan valid. Poin: +10 kontribusi, +5 selesai, +5 tepat waktu."
+    >
+      <span className="whitespace-nowrap text-[11px] font-black uppercase leading-tight tracking-[0.15em] text-cyan-300">
+        Peringkat
+        <br />
+        Bulan Ini
+      </span>
+      {data.reporters.length === 0 ? (
+        <span className="whitespace-nowrap rounded-xl border border-[#5f73ab] bg-gradient-to-b from-[#2a3a6a] to-[#233158] px-3 py-2 text-xs font-bold text-[#d4ddf0]">
+          Belum ada kontribusi valid bulan ini
+        </span>
       ) : (
-        <ol className="mt-3 space-y-2" aria-label="Peringkat kontributor valid bulan ini">
-          {data.reporters.slice(0, 5).map((person) => (
-            <li key={person.id} className="grid grid-cols-[28px_36px_1fr_auto] items-center gap-2 rounded-lg border border-[#465780] bg-[#18213f] p-2">
-              <span className="text-center text-sm font-black text-amber-300">{person.rank}</span>
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-700 text-xs font-black text-white">{initials(person.name)}</span>
-              <div className="min-w-0">
-                <p className="truncate text-xs font-black">{person.name}</p>
-                <p className="truncate text-[10px] text-slate-300">
-                  {person.validCount} valid · {person.closedCount} selesai · {person.onTimeCount} tepat waktu
-                </p>
-              </div>
-              <span className="font-mono text-sm font-black text-cyan-300">{person.score}</span>
-            </li>
+        <>
+          {data.reporters.slice(0, 3).map((person, index) => (
+            <span
+              key={person.id}
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border border-[#7185c2] bg-gradient-to-b from-[#31427a] to-[#283763] px-3 py-1.5"
+            >
+              <span className="text-xl" aria-hidden="true">{MEDALS[index]}</span>
+              <span className="leading-tight">
+                <span className="block text-sm font-black">{person.name}</span>
+                <span className="block text-[11px] font-semibold text-[#b3c0e0]">
+                  {person.validCount} valid · {person.closedCount} selesai
+                </span>
+              </span>
+              <span className="font-mono text-[15px] font-black text-cyan-300">{person.score}</span>
+            </span>
           ))}
-        </ol>
+          {data.departments.length > 0 && (
+            <>
+              <span className="h-8 w-px shrink-0 bg-[#5f73ab]" aria-hidden="true" />
+              {data.departments.slice(0, 2).map((team, index) => (
+                <span
+                  key={team.id}
+                  className="shrink-0 whitespace-nowrap rounded-xl border border-[#5f73ab] bg-gradient-to-b from-[#2a3a6a] to-[#233158] px-3 py-2 text-xs font-extrabold text-[#d4ddf0]"
+                >
+                  {index === 0 ? "Dept terbaik: " : ""}
+                  <b className="text-emerald-300">{team.code} — {team.score}</b>
+                </span>
+              ))}
+            </>
+          )}
+        </>
       )}
-
-      <div className="mt-4 border-t border-[#53618d] pt-3">
-        <h3 className="text-xs font-black uppercase tracking-wider text-slate-200">Performa departemen</h3>
-        <div className="mt-2 space-y-2">
-          {data?.departments.slice(0, 4).map((team) => (
-            <div key={team.id} className="rounded-lg border border-[#465780] bg-[#18213f] px-3 py-2">
-              <div className="flex items-center justify-between gap-2 text-xs font-bold">
-                <span className="truncate">{team.rank}. {team.code} — {team.name}</span>
-                <span className="font-mono text-cyan-300">{team.score}</span>
-              </div>
-              <p className="mt-1 text-[10px] text-slate-300">
-                Selesai {Math.round(team.closureRate * 100)}% · Tepat waktu {team.onTimeRate == null ? "—" : `${Math.round(team.onTimeRate * 100)}%`} · {team.validCount} valid
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </aside>
+    </div>
   );
 }
 
@@ -412,12 +416,12 @@ export function GaleriBoard() {
   };
 
   if (!data && !error) {
-    return <main className="flex min-h-dvh items-center justify-center bg-[#111936] text-lg font-bold text-slate-200" aria-live="polite">Memuat Safety &amp; 5S Live Wall…</main>;
+    return <main className="flex min-h-dvh items-center justify-center bg-[#0a0f24] text-lg font-bold text-slate-200" aria-live="polite">Memuat Safety &amp; 5S Live Wall…</main>;
   }
 
   return (
     <main
-      className="flex h-dvh min-h-[520px] flex-col overflow-hidden bg-[#111936] text-white"
+      className="flex h-dvh min-h-[520px] flex-col overflow-hidden bg-[#0a0f24] text-white"
       onMouseEnter={() => setInteractionPaused(true)}
       onMouseLeave={() => setInteractionPaused(false)}
       onFocusCapture={() => setInteractionPaused(true)}
@@ -425,15 +429,16 @@ export function GaleriBoard() {
         if (!event.currentTarget.contains(event.relatedTarget)) setInteractionPaused(false);
       }}
     >
-      <header className="flex min-h-16 shrink-0 items-center gap-3 border-b-2 border-[#465780] bg-[#1b274b] px-3 py-2 sm:px-5">
+      <header className="flex min-h-[72px] shrink-0 items-center gap-3 border-b-2 border-[#3d4d7e] bg-[#141d3d] px-3 py-2 sm:px-5">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-400 bg-cyan-500/15 text-2xl" aria-hidden="true">🛡</div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 shrink-0">
           <h1 className="truncate text-base font-black tracking-tight sm:text-xl">Safety &amp; 5S Live Wall</h1>
           <p className="truncate text-[10px] font-semibold text-slate-300 sm:text-xs">
             {data?.findings.length ?? 0} temuan valid · Diperbarui {data?.generatedAt ? new Date(data.generatedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" }) : "—"} WIB
           </p>
         </div>
-        <Link href="/" className="flex h-11 items-center justify-center rounded-lg border border-[#65749f] bg-[#26345d] px-3 text-xs font-black text-white hover:bg-[#344572] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300" aria-label="Keluar dari Live Wall dan kembali ke aplikasi">
+        <HeaderLeaderboard data={data?.leaderboard ?? null} />
+        <Link href="/" className="ml-auto flex h-11 shrink-0 items-center justify-center rounded-lg border border-[#65749f] bg-[#26345d] px-3 text-xs font-black text-white hover:bg-[#344572] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 lg:ml-0" aria-label="Keluar dari Live Wall dan kembali ke aplikasi">
           <span aria-hidden="true" className="mr-1.5">←</span><span className="hidden sm:inline">Kembali ke Aplikasi</span><span className="sm:hidden">Keluar</span>
         </Link>
       </header>
@@ -446,15 +451,15 @@ export function GaleriBoard() {
 
       {!data?.findings.length ? (
         <div className="flex flex-1 items-center justify-center p-8 text-center">
-          <div className="rounded-2xl border-2 border-dashed border-[#53618d] bg-[#1d2748] p-10">
+          <div className="rounded-2xl border-2 border-dashed border-[#6478b4] bg-[#25325c] p-10">
             <p className="text-4xl" aria-hidden="true">▧</p>
             <p className="mt-3 font-black">Belum ada temuan valid.</p>
           </div>
         </div>
       ) : (
-        <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-3 p-3 lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-1 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="min-h-0" aria-label={`Scene temuan ${activeSceneIndex + 1} dari ${scenes.length}`}>
-            <div className="h-full overflow-hidden rounded-xl bg-[#151f3e]">
+        <div className="min-h-0 flex-1 p-3">
+          <section className="h-full min-h-0" aria-label={`Scene temuan ${activeSceneIndex + 1} dari ${scenes.length}`}>
+            <div className="h-full overflow-hidden rounded-xl">
               <div
                 key={`${sceneSize}-${activeSceneIndex}-${scenes[activeSceneIndex]?.map((item) => item.id).join("-")}`}
                 className="grid h-full grid-cols-1 gap-3 p-1 sm:grid-cols-2 lg:grid-cols-3 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500"
@@ -473,11 +478,10 @@ export function GaleriBoard() {
               </div>
             </div>
           </section>
-          <LeaderboardPanel data={data.leaderboard} />
         </div>
       )}
 
-      <footer className="shrink-0 border-t-2 border-[#465780] bg-[#1b274b] px-3 py-2 sm:px-5">
+      <footer className="shrink-0 border-t-2 border-[#3d4d7e] bg-[#141d3d] px-3 py-2 sm:px-5">
         <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-[#344267]" role="progressbar" aria-label="Waktu menuju scene berikutnya" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
           <div className="h-full bg-cyan-400 motion-safe:transition-[width]" style={{ width: `${progress * 100}%` }} />
         </div>
