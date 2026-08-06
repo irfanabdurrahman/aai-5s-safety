@@ -45,3 +45,4 @@ next-env.d.ts
 # app secrets & runtime data
 /.secrets/
 /uploads/
+/data/

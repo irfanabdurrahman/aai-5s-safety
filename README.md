@@ -29,6 +29,7 @@ cp .env.example .env   # isi DATABASE_URL, SESSION_SECRET, dll
 npm install
 npx prisma migrate dev
 npx tsx prisma/seed.ts        # master data + akun dasar
+npx tsx prisma/seed-areas.ts  # master data aktual Plant Karawang: Dept P1–P4 → area → line
 npx tsx prisma/seed-demo.ts   # opsional: data demo historis
 npm run dev
 ```
