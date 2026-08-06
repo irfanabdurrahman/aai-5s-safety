@@ -156,12 +156,22 @@ function FindingImage({ finding }: { finding: GaleriFinding }) {
   }
 
   return (
-    <div className="relative h-full min-h-0">
+    <div className="relative h-full min-h-0 overflow-hidden bg-[#0d1430]">
+      {/* Latar blur dari foto yang sama: mengisi sisi kosong tanpa memotong
+          foto utama (mayoritas foto portrait, kotak kartu landscape). */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={liveWallPhotoUrl(photo.filePath)}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-md"
+        loading="eager"
+      />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={liveWallPhotoUrl(photo.filePath)}
         alt={`${photo.type === "AFTER" ? "Foto sesudah perbaikan" : "Foto temuan"} ${finding.number}`}
-        className="h-full w-full object-cover"
+        className="relative h-full w-full object-contain"
         loading="eager"
         onError={() => setFailed(true)}
       />
