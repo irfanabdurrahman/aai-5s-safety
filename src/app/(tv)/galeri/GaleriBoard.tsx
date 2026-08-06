@@ -564,8 +564,14 @@ export function GaleriBoard() {
       )}
 
       <footer className="shrink-0 border-t-2 border-[#3d4d7e] bg-[#141d3d] px-3 py-2 sm:px-5">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter status temuan">
+        <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-[#344267]" role="progressbar" aria-label="Waktu menuju scene berikutnya" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
+          <div className="h-full bg-cyan-400 motion-safe:transition-[width]" style={{ width: `${progress * 100}%` }} />
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+          <ControlButton label="Scene sebelumnya (panah kiri)" onClick={() => goTo(activeSceneIndex - 1)}>‹</ControlButton>
+          <ControlButton label={playing ? "Jeda rotasi otomatis (spasi)" : "Putar rotasi otomatis (spasi)"} onClick={() => setPlaying((value) => !value)} pressed={!playing}>{playing ? "Ⅱ" : "▶"}</ControlButton>
+          <ControlButton label="Scene berikutnya (panah kanan)" onClick={() => goTo(activeSceneIndex + 1)}>›</ControlButton>
+          <div className="ml-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter status temuan">
             <span className="mr-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Status</span>
             {STATUS_FILTERS.map((option) => (
               <FilterPill
@@ -576,7 +582,11 @@ export function GaleriBoard() {
               />
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter rentang waktu">
+          <div className="min-w-0 flex-1 text-center text-xs font-bold text-slate-300" aria-live="polite">
+            Scene {activeSceneIndex + 1} / {scenes.length}
+            <span className="hidden xl:inline"> · {autoPaused ? reducedMotion ? "Rotasi nonaktif: gerakan dikurangi" : "Rotasi dijeda" : "Berikutnya dalam 12 detik"}</span>
+          </div>
+          <div className="mr-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter rentang waktu">
             <span className="mr-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Waktu</span>
             {PERIOD_FILTERS.map((option) => (
               <FilterPill
@@ -586,18 +596,6 @@ export function GaleriBoard() {
                 onClick={() => setPeriodFilter(option.key)}
               />
             ))}
-          </div>
-        </div>
-        <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-[#344267]" role="progressbar" aria-label="Waktu menuju scene berikutnya" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
-          <div className="h-full bg-cyan-400 motion-safe:transition-[width]" style={{ width: `${progress * 100}%` }} />
-        </div>
-        <div className="flex items-center gap-2">
-          <ControlButton label="Scene sebelumnya (panah kiri)" onClick={() => goTo(activeSceneIndex - 1)}>‹</ControlButton>
-          <ControlButton label={playing ? "Jeda rotasi otomatis (spasi)" : "Putar rotasi otomatis (spasi)"} onClick={() => setPlaying((value) => !value)} pressed={!playing}>{playing ? "Ⅱ" : "▶"}</ControlButton>
-          <ControlButton label="Scene berikutnya (panah kanan)" onClick={() => goTo(activeSceneIndex + 1)}>›</ControlButton>
-          <div className="min-w-0 flex-1 text-center text-xs font-bold text-slate-300" aria-live="polite">
-            Scene {activeSceneIndex + 1} / {scenes.length}
-            <span className="hidden sm:inline"> · {autoPaused ? reducedMotion ? "Rotasi nonaktif: gerakan dikurangi" : "Rotasi dijeda" : "Berikutnya dalam 12 detik"}</span>
           </div>
           <ControlButton label="Aktifkan atau keluar layar penuh (F)" onClick={toggleFullscreen}>⛶</ControlButton>
         </div>
