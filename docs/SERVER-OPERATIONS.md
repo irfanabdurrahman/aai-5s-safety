@@ -13,6 +13,20 @@ yang dapat berubah sebelum bertindak dan jangan menyimpan kredensial di reposito
 > aplikasi lama **tidak berlaku lagi**; prinsip umum (backup, verifikasi, rollback, secret) tetap
 > berlaku.
 
+> **PEMBARUAN 2026-08-10:** Rilis `release-20260810-201544` menambahkan server MCP
+> (`/api/mcp`, auth `Authorization: Bearer $MCP_TOKEN`, 6 tools baca + `buat_temuan`) dan
+> intake WhatsApp (`/api/intake/whatsapp`, auth header `x-intake-secret`). Container baru
+> **`safety5s-waha`** (image `devlikeapro/waha`, network `coolify`, restart `unless-stopped`)
+> menjalankan WAHA CORE session `default` dengan webhook `message` →
+> `http://safety5s-greenfield-app:3000/api/intake/whatsapp` (custom header `x-intake-secret`).
+> Env baru di `runtime.env`: `MCP_TOKEN`, `WA_INTAKE_SECRET`, `WAHA_BASE_URL=http://safety5s-waha:3000`,
+> `WAHA_API_KEY`, `WAHA_SESSION=default`, dan `WA_GROUP_ID` (**masih kosong** — isi dengan chat id
+> grup WA setelah bot discan & dimasukkan ke grup, lalu `docker compose up -d app` ulang).
+> User `WA-BOT` (Bot WhatsApp) dibuat di DB produksi sebagai pelapor temuan dari intake.
+> QR pairing WAHA: `GET http://<ip-waha>:3000/api/default/auth/qr` dengan header `X-Api-Key`
+> (QR cepat kedaluwarsa, ambil ulang bila perlu). Backup pre-deploy rilis ini:
+> `/home/irfan/aai-5s-safety-backup-deploy-aTM9BO/`.
+
 ## 1. Inventaris produksi
 
 | Komponen | Konfigurasi saat diverifikasi (2026-08-06) |

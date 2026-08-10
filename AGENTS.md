@@ -36,6 +36,10 @@ backup/restore, perubahan domain, atau troubleshooting Coolify.
 - Environment opsional integrasi (fitur MCP & intake WhatsApp): `MCP_TOKEN`,
   `WA_INTAKE_SECRET`, `WA_GROUP_ID`, `WAHA_BASE_URL`, `WAHA_API_KEY`, `WAHA_SESSION`.
   Bila kosong, endpoint `/api/mcp` dan `/api/intake/whatsapp` menolak semua request (aman by default).
+- Integrasi WhatsApp berjalan via container **`safety5s-waha`** (WAHA CORE, network `coolify`),
+  session `default`, webhook `message` → app dengan header `x-intake-secret`. QR pairing dan
+  pengisian `WA_GROUP_ID` adalah langkah manual user; detail di `docs/SERVER-OPERATIONS.md`
+  (pembaruan 2026-08-10).
 - Akses TV/galeri memakai one-time token exchange: buka `/galeri?token=…` atau
   `/tv?token=…` → server set cookie kiosk; token mentah tidak diterima langsung di API.
 - Container menjalankan `prisma migrate deploy` sebelum server dimulai. Migration produksi harus
