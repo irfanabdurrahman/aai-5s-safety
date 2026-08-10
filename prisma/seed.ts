@@ -49,6 +49,8 @@ async function main() {
     { npk: "20001", name: "Rina Kartika", role: "SUPERVISOR", dept: "DISC" },
     { npk: "30001", name: "Agus Wibowo", role: "PIC_AREA", dept: "DISC" },
     { npk: "40001", name: "Dedi Kurniawan", role: "KARYAWAN", dept: "DISC" },
+    // Pelapor sistem untuk temuan yang masuk via WhatsApp/MCP (tanpa departemen)
+    { npk: "WA-BOT", name: "Bot WhatsApp", role: "KARYAWAN", dept: null },
   ] as const;
   for (const u of users) {
     await prisma.user.upsert({
@@ -59,7 +61,7 @@ async function main() {
         name: u.name,
         role: u.role,
         passwordHash: hash,
-        departmentId: dept[u.dept].id,
+        departmentId: u.dept ? dept[u.dept].id : null,
       },
     });
   }

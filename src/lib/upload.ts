@@ -19,6 +19,19 @@ export async function savePhoto(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
   const detected = signatures.find((s) => s.test(buffer));
   if (!detected || file.type !== detected.type) throw new Error("Isi foto tidak cocok dengan format JPG, PNG, atau WebP");
+  return writePhotoAtomic(buffer, detected.ext);
+}
+
+/** Simpan foto dari buffer mentah (intake WhatsApp/MCP — bukan FormData).
+ *  Validasi magic bytes sama seperti savePhoto; mime harus cocok dengan isi. */
+export async function savePhotoBuffer(buffer: Buffer, mime: string): Promise<string> {
+  if (buffer.byteLength <= 0 || buffer.byteLength > MAX_PHOTO_BYTES) throw new Error("Ukuran foto maksimal 8MB");
+  const detected = signatures.find((s) => s.test(buffer));
+  if (!detected || mime !== detected.type) throw new Error("Isi foto tidak cocok dengan format JPG, PNG, atau WebP");
+  return writePhotoAtomic(buffer, detected.ext);
+}
+
+async function writePhotoAtomic(buffer: Buffer, ext: string): Promise<string> {
   await mkdir(UPLOAD_DIR, { recursive: true });
   const root = await realpath(UPLOAD_DIR);
   if (root !== UPLOAD_DIR) throw new Error("Direktori upload tidak aman");
@@ -26,7 +39,7 @@ export async function savePhoto(file: File): Promise<string> {
   const dir = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,"0")}`;
   const finalDir = path.join(root, dir);
   await mkdir(finalDir, { recursive: true });
-  const name = `${Date.now()}_${crypto.randomBytes(12).toString("hex")}.${detected.ext}`;
+  const name = `${Date.now()}_${crypto.randomBytes(12).toString("hex")}.${ext}`;
   const staging = path.join(root, `.staging-${crypto.randomUUID()}`);
   const target = path.join(finalDir, name);
   try { await writeFile(staging, buffer, { flag: "wx", mode: 0o640 }); await rename(staging, target); }

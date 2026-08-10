@@ -405,11 +405,15 @@ export function GaleriBoard() {
   }, [sceneCount]);
 
   // Ganti filter → mulai lagi dari scene pertama
+  // (defer via timeout: setState sinkron di effect memicu cascading render)
   useEffect(() => {
-    setSceneIndex(0);
-    startedAt.current = 0;
-    progressRef.current = 0;
-    setProgress(0);
+    const t = setTimeout(() => {
+      setSceneIndex(0);
+      startedAt.current = 0;
+      progressRef.current = 0;
+      setProgress(0);
+    }, 0);
+    return () => clearTimeout(t);
   }, [statusFilter, periodFilter]);
 
   useEffect(() => {
