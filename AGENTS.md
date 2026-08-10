@@ -33,6 +33,9 @@ backup/restore, perubahan domain, atau troubleshooting Coolify.
   untuk dev. Jangan dianggap sumber data produksi.
 - Environment wajib: `DATABASE_URL`, `SESSION_SECRET`, `CRON_SECRET`, `TV_TOKEN`, dan
   `UPLOAD_DIR=/app/uploads`. Pertahankan nilai produksi yang sudah ada saat update rutin.
+- Environment opsional integrasi (fitur MCP & intake WhatsApp): `MCP_TOKEN`,
+  `WA_INTAKE_SECRET`, `WA_GROUP_ID`, `WAHA_BASE_URL`, `WAHA_API_KEY`, `WAHA_SESSION`.
+  Bila kosong, endpoint `/api/mcp` dan `/api/intake/whatsapp` menolak semua request (aman by default).
 - Akses TV/galeri memakai one-time token exchange: buka `/galeri?token=…` atau
   `/tv?token=…` → server set cookie kiosk; token mentah tidak diterima langsung di API.
 - Container menjalankan `prisma migrate deploy` sebelum server dimulai. Migration produksi harus

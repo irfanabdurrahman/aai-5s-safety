@@ -62,3 +62,16 @@ otomatis jam 06:00 WIB, atau manual:
 ```bash
 curl -X POST -H "x-cron-secret: $CRON_SECRET" https://<host>/api/cron/run
 ```
+
+## Integrasi AI (MCP) & WhatsApp
+
+**MCP server** di `POST /api/mcp` (Streamable HTTP, auth `Authorization: Bearer $MCP_TOKEN`).
+Tools: `ringkasan_status`, `cari_temuan` (filter status/area/risiko/belumDiassign/overdue/keyword),
+`detail_temuan`, `temuan_per_area`, `skor_5s_area`, `leaderboard_pelapor`, `buat_temuan`.
+
+**Intake WhatsApp** di `POST /api/intake/whatsapp` (auth header `x-intake-secret`).
+Dirancang untuk webhook WAHA: pesan gambar di grup `WA_GROUP_ID` dengan caption
+ber-keyword (`temuan`/`safety`/`5S`/`near miss`/dst) otomatis menjadi temuan baru
+berstatus Terbuka — area & risiko ditebak dari teks (`src/lib/area-map.ts`),
+pelapor tercatat sebagai user `WA-BOT`, dan bot membalas nomor temuan ke grup.
+Foto disimpan apa adanya (tanpa analisis AI).
