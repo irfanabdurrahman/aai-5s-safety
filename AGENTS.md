@@ -10,6 +10,22 @@ Baca [`docs/SERVER-OPERATIONS.md`](docs/SERVER-OPERATIONS.md) sampai selesai seb
 deployment, update aplikasi di server, migration produksi, perubahan environment variable,
 backup/restore, perubahan domain, atau troubleshooting Coolify.
 
+## PENTING: kode yang benar-benar jalan di produksi ada di branch lain
+
+Repo ini (`main`) adalah redesign v2 — **bukan** source yang di-deploy. Source produksi asli
+ada di server (`/root/apps/aai-5s-safety-v2`, versi "hardened") dan sejak **2026-08-30** di-backup
+ke GitHub sebagai branch **[`production-hardened`](https://github.com/irfanabdurrahman/aai-5s-safety/tree/production-hardened)**
+di repo yang sama. Kedua branch **sudah lama divergen** (history berbeda total, bukan
+fast-forward) — jangan merge/rebase salah satu ke `main` tanpa rekonsiliasi eksplisit.
+
+- Mau tahu fitur/kode yang **benar-benar aktif di https://safety5s.com sekarang**
+  (OAuth MCP, Papan Peringkat versi baru, halaman Panduan, dst)? Cek branch
+  `production-hardened`, bukan `main`.
+- Push rutin dari server ke branch itu: `cd /root/apps/aai-5s-safety-v2 && git add -A && git commit -m "..." && git push`
+  (remote `origin` dan upstream `production-hardened` sudah diset).
+- `main` di repo ini tetap dipakai untuk kerja desain/redesign v2 yang belum tentu sama dengan
+  yang jalan di produksi — lihat juga bagian "Konteks produksi" di bawah untuk detail per rilis.
+
 ## Konteks produksi (diperbarui 2026-08-29, rilis OAuth MCP)
 
 - **OAuth 2.1 authorization server untuk MCP** ditambahkan di rilis
