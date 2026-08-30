@@ -136,3 +136,18 @@ export type OAuthAuthCode = Prisma.OAuthAuthCodeModel
  * 
  */
 export type OAuthToken = Prisma.OAuthTokenModel
+/**
+ * Model AiSettings
+ * 
+ */
+export type AiSettings = Prisma.AiSettingsModel
+/**
+ * Model AiConversation
+ * 
+ */
+export type AiConversation = Prisma.AiConversationModel
+/**
+ * Model AiMessage
+ * 
+ */
+export type AiMessage = Prisma.AiMessageModel

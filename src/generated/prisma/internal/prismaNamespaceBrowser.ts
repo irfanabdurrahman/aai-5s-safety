@@ -69,7 +69,10 @@ export const ModelName = {
   LoginThrottle: 'LoginThrottle',
   AccountResetBatch: 'AccountResetBatch',
   OAuthAuthCode: 'OAuthAuthCode',
-  OAuthToken: 'OAuthToken'
+  OAuthToken: 'OAuthToken',
+  AiSettings: 'AiSettings',
+  AiConversation: 'AiConversation',
+  AiMessage: 'AiMessage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -339,6 +342,48 @@ export const OAuthTokenScalarFieldEnum = {
 } as const
 
 export type OAuthTokenScalarFieldEnum = (typeof OAuthTokenScalarFieldEnum)[keyof typeof OAuthTokenScalarFieldEnum]
+
+
+export const AiSettingsScalarFieldEnum = {
+  id: 'id',
+  isEnabled: 'isEnabled',
+  provider: 'provider',
+  baseUrl: 'baseUrl',
+  model: 'model',
+  apiKeyEnvVar: 'apiKeyEnvVar',
+  reasoningEffort: 'reasoningEffort',
+  enableThinking: 'enableThinking',
+  maxOutputTokens: 'maxOutputTokens',
+  systemPrompt: 'systemPrompt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiSettingsScalarFieldEnum = (typeof AiSettingsScalarFieldEnum)[keyof typeof AiSettingsScalarFieldEnum]
+
+
+export const AiConversationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiConversationScalarFieldEnum = (typeof AiConversationScalarFieldEnum)[keyof typeof AiConversationScalarFieldEnum]
+
+
+export const AiMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  role: 'role',
+  content: 'content',
+  model: 'model',
+  promptTokens: 'promptTokens',
+  completionTokens: 'completionTokens',
+  createdAt: 'createdAt'
+} as const
+
+export type AiMessageScalarFieldEnum = (typeof AiMessageScalarFieldEnum)[keyof typeof AiMessageScalarFieldEnum]
 
 
 export const SortOrder = {

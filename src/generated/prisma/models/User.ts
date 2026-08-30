@@ -267,6 +267,7 @@ export type UserWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   statusChanges?: Prisma.FindingStatusHistoryListRelationFilter
   uploadedPhotos?: Prisma.FindingPhotoListRelationFilter
+  aiConversations?: Prisma.AiConversationListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -291,6 +292,7 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   statusChanges?: Prisma.FindingStatusHistoryOrderByRelationAggregateInput
   uploadedPhotos?: Prisma.FindingPhotoOrderByRelationAggregateInput
+  aiConversations?: Prisma.AiConversationOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -318,6 +320,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   statusChanges?: Prisma.FindingStatusHistoryListRelationFilter
   uploadedPhotos?: Prisma.FindingPhotoListRelationFilter
+  aiConversations?: Prisma.AiConversationListRelationFilter
 }, "id" | "npk">
 
 export type UserOrderByWithAggregationInput = {
@@ -375,6 +378,7 @@ export type UserCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -398,6 +402,7 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -421,6 +426,7 @@ export type UserUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -444,6 +450,7 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -755,6 +762,20 @@ export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type UserCreateNestedOneWithoutAiConversationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiConversationsInput, Prisma.UserUncheckedCreateWithoutAiConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAiConversationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAiConversationsInput, Prisma.UserUncheckedCreateWithoutAiConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAiConversationsInput
+  upsert?: Prisma.UserUpsertWithoutAiConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiConversationsInput, Prisma.UserUpdateWithoutAiConversationsInput>, Prisma.UserUncheckedUpdateWithoutAiConversationsInput>
+}
+
 export type UserCreateWithoutDepartmentInput = {
   id?: string
   npk: string
@@ -775,6 +796,7 @@ export type UserCreateWithoutDepartmentInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDepartmentInput = {
@@ -797,6 +819,7 @@ export type UserUncheckedCreateWithoutDepartmentInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDepartmentInput = {
@@ -861,6 +884,7 @@ export type UserCreateWithoutPicAreasInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPicAreasInput = {
@@ -883,6 +907,7 @@ export type UserUncheckedCreateWithoutPicAreasInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPicAreasInput = {
@@ -921,6 +946,7 @@ export type UserUpdateWithoutPicAreasInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPicAreasInput = {
@@ -943,6 +969,7 @@ export type UserUncheckedUpdateWithoutPicAreasInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditSchedulesInput = {
@@ -965,6 +992,7 @@ export type UserCreateWithoutAuditSchedulesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditSchedulesInput = {
@@ -987,6 +1015,7 @@ export type UserUncheckedCreateWithoutAuditSchedulesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditSchedulesInput = {
@@ -1025,6 +1054,7 @@ export type UserUpdateWithoutAuditSchedulesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditSchedulesInput = {
@@ -1047,6 +1077,7 @@ export type UserUncheckedUpdateWithoutAuditSchedulesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditsInput = {
@@ -1069,6 +1100,7 @@ export type UserCreateWithoutAuditsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditsInput = {
@@ -1091,6 +1123,7 @@ export type UserUncheckedCreateWithoutAuditsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditsInput = {
@@ -1129,6 +1162,7 @@ export type UserUpdateWithoutAuditsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditsInput = {
@@ -1151,6 +1185,7 @@ export type UserUncheckedUpdateWithoutAuditsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReportedFindingsInput = {
@@ -1173,6 +1208,7 @@ export type UserCreateWithoutReportedFindingsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReportedFindingsInput = {
@@ -1195,6 +1231,7 @@ export type UserUncheckedCreateWithoutReportedFindingsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReportedFindingsInput = {
@@ -1222,6 +1259,7 @@ export type UserCreateWithoutAssignedFindingsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAssignedFindingsInput = {
@@ -1244,6 +1282,7 @@ export type UserUncheckedCreateWithoutAssignedFindingsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAssignedFindingsInput = {
@@ -1271,6 +1310,7 @@ export type UserCreateWithoutVerifiedFindingsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVerifiedFindingsInput = {
@@ -1293,6 +1333,7 @@ export type UserUncheckedCreateWithoutVerifiedFindingsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVerifiedFindingsInput = {
@@ -1331,6 +1372,7 @@ export type UserUpdateWithoutReportedFindingsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReportedFindingsInput = {
@@ -1353,6 +1395,7 @@ export type UserUncheckedUpdateWithoutReportedFindingsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutAssignedFindingsInput = {
@@ -1386,6 +1429,7 @@ export type UserUpdateWithoutAssignedFindingsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignedFindingsInput = {
@@ -1408,6 +1452,7 @@ export type UserUncheckedUpdateWithoutAssignedFindingsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutVerifiedFindingsInput = {
@@ -1441,6 +1486,7 @@ export type UserUpdateWithoutVerifiedFindingsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerifiedFindingsInput = {
@@ -1463,6 +1509,7 @@ export type UserUncheckedUpdateWithoutVerifiedFindingsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUploadedPhotosInput = {
@@ -1485,6 +1532,7 @@ export type UserCreateWithoutUploadedPhotosInput = {
   comments?: Prisma.CommentCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUploadedPhotosInput = {
@@ -1507,6 +1555,7 @@ export type UserUncheckedCreateWithoutUploadedPhotosInput = {
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUploadedPhotosInput = {
@@ -1545,6 +1594,7 @@ export type UserUpdateWithoutUploadedPhotosInput = {
   comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedPhotosInput = {
@@ -1567,6 +1617,7 @@ export type UserUncheckedUpdateWithoutUploadedPhotosInput = {
   comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStatusChangesInput = {
@@ -1589,6 +1640,7 @@ export type UserCreateWithoutStatusChangesInput = {
   comments?: Prisma.CommentCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStatusChangesInput = {
@@ -1611,6 +1663,7 @@ export type UserUncheckedCreateWithoutStatusChangesInput = {
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStatusChangesInput = {
@@ -1649,6 +1702,7 @@ export type UserUpdateWithoutStatusChangesInput = {
   comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStatusChangesInput = {
@@ -1671,6 +1725,7 @@ export type UserUncheckedUpdateWithoutStatusChangesInput = {
   comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommentsInput = {
@@ -1693,6 +1748,7 @@ export type UserCreateWithoutCommentsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommentsInput = {
@@ -1715,6 +1771,7 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommentsInput = {
@@ -1753,6 +1810,7 @@ export type UserUpdateWithoutCommentsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -1775,6 +1833,7 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1797,6 +1856,7 @@ export type UserCreateWithoutNotificationsInput = {
   comments?: Prisma.CommentCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1819,6 +1879,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+  aiConversations?: Prisma.AiConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1857,6 +1918,7 @@ export type UserUpdateWithoutNotificationsInput = {
   comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1877,6 +1939,115 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   audits?: Prisma.AuditUncheckedUpdateManyWithoutAuditorNestedInput
   auditSchedules?: Prisma.AuditScheduleUncheckedUpdateManyWithoutAuditorNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
+  uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAiConversationsInput = {
+  id?: string
+  npk: string
+  name: string
+  passwordHash: string
+  role?: $Enums.Role
+  isActive?: boolean
+  mustChangePassword?: boolean
+  sessionVersion?: number
+  createdAt?: Date | string
+  department?: Prisma.DepartmentCreateNestedOneWithoutUsersInput
+  picAreas?: Prisma.AreaCreateNestedManyWithoutPicUserInput
+  reportedFindings?: Prisma.FindingCreateNestedManyWithoutReporterInput
+  assignedFindings?: Prisma.FindingCreateNestedManyWithoutPicInput
+  verifiedFindings?: Prisma.FindingCreateNestedManyWithoutVerifiedByInput
+  audits?: Prisma.AuditCreateNestedManyWithoutAuditorInput
+  auditSchedules?: Prisma.AuditScheduleCreateNestedManyWithoutAuditorInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  statusChanges?: Prisma.FindingStatusHistoryCreateNestedManyWithoutActorInput
+  uploadedPhotos?: Prisma.FindingPhotoCreateNestedManyWithoutUploadedByInput
+}
+
+export type UserUncheckedCreateWithoutAiConversationsInput = {
+  id?: string
+  npk: string
+  name: string
+  passwordHash: string
+  role?: $Enums.Role
+  departmentId?: string | null
+  isActive?: boolean
+  mustChangePassword?: boolean
+  sessionVersion?: number
+  createdAt?: Date | string
+  picAreas?: Prisma.AreaUncheckedCreateNestedManyWithoutPicUserInput
+  reportedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutReporterInput
+  assignedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutPicInput
+  verifiedFindings?: Prisma.FindingUncheckedCreateNestedManyWithoutVerifiedByInput
+  audits?: Prisma.AuditUncheckedCreateNestedManyWithoutAuditorInput
+  auditSchedules?: Prisma.AuditScheduleUncheckedCreateNestedManyWithoutAuditorInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  statusChanges?: Prisma.FindingStatusHistoryUncheckedCreateNestedManyWithoutActorInput
+  uploadedPhotos?: Prisma.FindingPhotoUncheckedCreateNestedManyWithoutUploadedByInput
+}
+
+export type UserCreateOrConnectWithoutAiConversationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiConversationsInput, Prisma.UserUncheckedCreateWithoutAiConversationsInput>
+}
+
+export type UserUpsertWithoutAiConversationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAiConversationsInput, Prisma.UserUncheckedUpdateWithoutAiConversationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAiConversationsInput, Prisma.UserUncheckedCreateWithoutAiConversationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAiConversationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAiConversationsInput, Prisma.UserUncheckedUpdateWithoutAiConversationsInput>
+}
+
+export type UserUpdateWithoutAiConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  npk?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  department?: Prisma.DepartmentUpdateOneWithoutUsersNestedInput
+  picAreas?: Prisma.AreaUpdateManyWithoutPicUserNestedInput
+  reportedFindings?: Prisma.FindingUpdateManyWithoutReporterNestedInput
+  assignedFindings?: Prisma.FindingUpdateManyWithoutPicNestedInput
+  verifiedFindings?: Prisma.FindingUpdateManyWithoutVerifiedByNestedInput
+  audits?: Prisma.AuditUpdateManyWithoutAuditorNestedInput
+  auditSchedules?: Prisma.AuditScheduleUpdateManyWithoutAuditorNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
+  uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAiConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  npk?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  picAreas?: Prisma.AreaUncheckedUpdateManyWithoutPicUserNestedInput
+  reportedFindings?: Prisma.FindingUncheckedUpdateManyWithoutReporterNestedInput
+  assignedFindings?: Prisma.FindingUncheckedUpdateManyWithoutPicNestedInput
+  verifiedFindings?: Prisma.FindingUncheckedUpdateManyWithoutVerifiedByNestedInput
+  audits?: Prisma.AuditUncheckedUpdateManyWithoutAuditorNestedInput
+  auditSchedules?: Prisma.AuditScheduleUncheckedUpdateManyWithoutAuditorNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
 }
@@ -1913,6 +2084,7 @@ export type UserUpdateWithoutDepartmentInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDepartmentInput = {
@@ -1935,6 +2107,7 @@ export type UserUncheckedUpdateWithoutDepartmentInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   statusChanges?: Prisma.FindingStatusHistoryUncheckedUpdateManyWithoutActorNestedInput
   uploadedPhotos?: Prisma.FindingPhotoUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiConversations?: Prisma.AiConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutDepartmentInput = {
@@ -1965,6 +2138,7 @@ export type UserCountOutputType = {
   notifications: number
   statusChanges: number
   uploadedPhotos: number
+  aiConversations: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1978,6 +2152,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   statusChanges?: boolean | UserCountOutputTypeCountStatusChangesArgs
   uploadedPhotos?: boolean | UserCountOutputTypeCountUploadedPhotosArgs
+  aiConversations?: boolean | UserCountOutputTypeCountAiConversationsArgs
 }
 
 /**
@@ -2060,6 +2235,13 @@ export type UserCountOutputTypeCountUploadedPhotosArgs<ExtArgs extends runtime.T
   where?: Prisma.FindingPhotoWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAiConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiConversationWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2083,6 +2265,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   statusChanges?: boolean | Prisma.User$statusChangesArgs<ExtArgs>
   uploadedPhotos?: boolean | Prisma.User$uploadedPhotosArgs<ExtArgs>
+  aiConversations?: boolean | Prisma.User$aiConversationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2140,6 +2323,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   statusChanges?: boolean | Prisma.User$statusChangesArgs<ExtArgs>
   uploadedPhotos?: boolean | Prisma.User$uploadedPhotosArgs<ExtArgs>
+  aiConversations?: boolean | Prisma.User$aiConversationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2163,6 +2347,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     statusChanges: Prisma.$FindingStatusHistoryPayload<ExtArgs>[]
     uploadedPhotos: Prisma.$FindingPhotoPayload<ExtArgs>[]
+    aiConversations: Prisma.$AiConversationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2580,6 +2765,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   statusChanges<T extends Prisma.User$statusChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$statusChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FindingStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   uploadedPhotos<T extends Prisma.User$uploadedPhotosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$uploadedPhotosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FindingPhotoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiConversations<T extends Prisma.User$aiConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3276,6 +3462,30 @@ export type User$uploadedPhotosArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.FindingPhotoScalarFieldEnum | Prisma.FindingPhotoScalarFieldEnum[]
+}
+
+/**
+ * User.aiConversations
+ */
+export type User$aiConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiConversation
+   */
+  select?: Prisma.AiConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiConversation
+   */
+  omit?: Prisma.AiConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiConversationInclude<ExtArgs> | null
+  where?: Prisma.AiConversationWhereInput
+  orderBy?: Prisma.AiConversationOrderByWithRelationInput | Prisma.AiConversationOrderByWithRelationInput[]
+  cursor?: Prisma.AiConversationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiConversationScalarFieldEnum | Prisma.AiConversationScalarFieldEnum[]
 }
 
 /**
