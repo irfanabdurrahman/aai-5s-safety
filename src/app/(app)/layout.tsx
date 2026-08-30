@@ -4,7 +4,7 @@ import { navForRole } from "@/components/layout/nav-items";
 import { BottomNav, Sidebar } from "@/components/layout/AppNav";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ROLE_LABELS } from "@/lib/rbac";
-import { IconShield } from "@/components/icons";
+import { IconShield, IconSparkles } from "@/components/icons";
 import { Initials } from "@/components/ui/Initials";
 
 export default async function AppLayout({
@@ -54,6 +54,13 @@ export default async function AppLayout({
             PT Akebono Brake Astra Indonesia
           </span>
           <div className="flex-1" />
+          <Link
+            href="/asisten-ai"
+            title="AI Safety Assistant"
+            className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10 lg:text-brand lg:hover:bg-brand-soft"
+          >
+            <IconSparkles size={19} />
+          </Link>
           <NotificationBell />
           <Link href="/profil" title={user.name}>
             <Initials name={user.name} />

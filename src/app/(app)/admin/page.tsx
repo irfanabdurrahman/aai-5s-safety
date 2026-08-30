@@ -10,6 +10,7 @@ import {
   IconCalendar,
   IconDownload,
   IconChevronRight,
+  IconSettings,
 } from "@/components/icons";
 
 export const metadata: Metadata = { title: "Admin" };
@@ -52,6 +53,13 @@ export default async function AdminPage() {
       cls: "tile-orange",
       title: "Jadwal Audit",
       desc: `${schedules} jadwal aktif`,
+    },
+    {
+      href: "/admin/ai",
+      icon: <IconSettings size={22} />,
+      cls: "tile-indigo",
+      title: "AI & LLM",
+      desc: "Provider, model reasoning, dan instruksi AI",
     },
     {
       href: "/admin/laporan",

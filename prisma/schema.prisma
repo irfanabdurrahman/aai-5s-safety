@@ -81,6 +81,11 @@ enum NotificationType {
   AUDIT_DUE
 }
 
+enum AiMessageRole {
+  USER
+  ASSISTANT
+}
+
 // ============================================================
 // Master data
 // ============================================================
@@ -148,6 +153,7 @@ model User {
   notifications    Notification[]
   statusChanges    FindingStatusHistory[]
   uploadedPhotos   FindingPhoto[]
+  aiConversations  AiConversation[]
 
   @@index([departmentId])
 }
@@ -224,9 +230,9 @@ model Audit {
   scores   AuditScore[]
   findings Finding[]
 
+  @@unique([scheduleId, scheduledDate])
   @@index([areaId, scheduledDate])
   @@index([auditorId, status])
-  @@unique([scheduleId, scheduledDate])
 }
 
 model AuditScore {
@@ -401,4 +407,51 @@ model OAuthToken {
   createdAt        DateTime  @default(now())
 
   @@index([expiresAt])
+}
+
+// ============================================================
+// AI Safety Assistant
+// ============================================================
+
+model AiSettings {
+  id              String   @id @default("default")
+  isEnabled       Boolean  @default(true)
+  provider        String   @default("DEEPSEEK")
+  baseUrl         String   @default("https://api.deepseek.com")
+  model           String   @default("deepseek-v4-pro")
+  apiKeyEnvVar    String   @default("DEEPSEEK_API_KEY")
+  reasoningEffort String   @default("max")
+  enableThinking  Boolean  @default(true)
+  maxOutputTokens Int      @default(8000)
+  systemPrompt    String?
+  updatedAt       DateTime @updatedAt
+}
+
+model AiConversation {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String   @default("Percakapan baru")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model AiMessage {
+  id               String        @id @default(cuid())
+  conversationId   String
+  role             AiMessageRole
+  content          String
+  model            String?
+  promptTokens     Int?
+  completionTokens Int?
+  createdAt        DateTime      @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([role, createdAt])
 }

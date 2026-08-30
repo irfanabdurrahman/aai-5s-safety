@@ -10,6 +10,7 @@ import {
   IconTv,
   IconBuilding,
   IconBook,
+  IconSparkles,
 } from "@/components/icons";
 import type { NavItem } from "./nav-items";
 
@@ -25,6 +26,7 @@ const MAP = {
   tv: IconTv,
   building: IconBuilding,
   book: IconBook,
+  sparkles: IconSparkles,
 } as const;
 
 export function NavIcon({

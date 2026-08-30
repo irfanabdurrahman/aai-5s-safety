@@ -17,7 +17,7 @@ services:
       start_period: 10s
 
   migrate:
-    image: 127.0.0.1:5000/aai-5s-safety@sha256:24205a5995f82065588c508d004c5a71f0edaa05eb0d5b2b8939a0b6ed143f4a
+    image: 127.0.0.1:5000/aai-5s-safety@sha256:a19c476f53e9702d2da0fbbd0c81bb3de681dcfa87505a165ee5d04d3c04320b
     profiles: ["migration"]
     env_file:
       - /root/secure/aai-5s-safety-greenfield/migration.env
@@ -29,18 +29,19 @@ services:
       - safety5s-internal
 
   app:
-    image: 127.0.0.1:5000/aai-5s-safety@sha256:24205a5995f82065588c508d004c5a71f0edaa05eb0d5b2b8939a0b6ed143f4a
+    image: 127.0.0.1:5000/aai-5s-safety@sha256:a19c476f53e9702d2da0fbbd0c81bb3de681dcfa87505a165ee5d04d3c04320b
     container_name: safety5s-greenfield-app
     restart: unless-stopped
     env_file:
       - /root/secure/aai-5s-safety-greenfield/runtime.env
+      - /root/secure/aai-5s-safety-greenfield/deepseek.env
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: "3000"
       UPLOAD_DIR: /app/uploads
-      APP_RELEASE_ID: release-20260830-151109
-      APP_SCHEMA_MARKER: 20260719193500_audit_schedule_created_at
+      APP_RELEASE_ID: release-20260830-215030
+      APP_SCHEMA_MARKER: 20260830170000_ai_safety_assistant
     volumes:
       - safety5s-greenfield-uploads:/app/uploads
     networks:
