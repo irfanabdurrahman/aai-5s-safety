@@ -27,11 +27,32 @@ yang dapat berubah sebelum bertindak dan jangan menyimpan kredensial di reposito
 > (QR cepat kedaluwarsa, ambil ulang bila perlu). Backup pre-deploy rilis ini:
 > `/home/irfan/aai-5s-safety-backup-deploy-aTM9BO/`.
 
+> **PEMBARUAN 2026-08-29 (malam):** Rilis `release-20260829-234754` menambahkan
+> **OAuth 2.1 authorization server** di aplikasi supaya `/api/mcp` bisa dipasang sebagai
+> custom connector di claude.ai web & ChatGPT web (bukan hanya Bearer token statis via
+> Claude Code CLI). Endpoint baru: `/oauth/authorize`, `/oauth/token`,
+> `/.well-known/oauth-protected-resource/api/mcp`, `/.well-known/oauth-authorization-server`.
+> Gate consent-nya password admin terpisah (`MCP_OAUTH_ADMIN_PASSWORD`), bukan akun NPK.
+> 2 tabel baru (`OAuthAuthCode`, `OAuthToken`) via migration
+> `20260829213000_oauth_authorization_server` — murni tabel baru, tidak mengubah data lama.
+> **Resource URL di-fix ke `https://safety5s.com/api/mcp`** — connector claude.ai/ChatGPT
+> WAJIB pakai domain `safety5s.com`, bukan `irfan-apps.online`. Detail lengkap lihat AGENTS.md
+> bagian "Konteks produksi (rilis OAuth MCP)". Sudah diuji end-to-end via curl (authorize →
+> consent → code → token → panggil tool) sebelum dianggap selesai.
+
+> **PEMBARUAN 2026-08-29:** Domain custom `safety5s.com` (dan `www.safety5s.com`) milik user
+> ditambahkan sebagai alias produksi. DNS A record kedua domain sudah diarahkan user ke
+> `109.199.98.96` (di luar `irfan-apps.online`, jadi bukan bagian wildcard). Traefik router
+> `safety5s-greenfield-http`/`-https` di `compose.greenfield.yml` diupdate agar rule `Host(...)`
+> mencakup ketiga hostname sekaligus (OR), lalu `docker compose up -d app` untuk recreate
+> container (tanpa rebuild image, tanpa migration). TLS Let's Encrypt terverifikasi jalan untuk
+> ketiga domain. Backup file sebelum edit: `compose.greenfield.yml.bak-20260829-204105`.
+
 ## 1. Inventaris produksi
 
 | Komponen | Konfigurasi saat diverifikasi (2026-08-06) |
 | --- | --- |
-| URL produksi | `https://safety5s.irfan-apps.online` |
+| URL produksi | `https://safety5s.irfan-apps.online`, `https://safety5s.com`, `https://www.safety5s.com` (alias, ditambahkan 2026-08-29) |
 | IP publik | `109.199.98.96` |
 | Cara deploy | Docker Compose, project `aai-5s-safety-v2` |
 | File compose | `/root/apps/aai-5s-safety-v2/compose.greenfield.yml` (akses `sudo`) |

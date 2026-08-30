@@ -10,9 +10,64 @@ Baca [`docs/SERVER-OPERATIONS.md`](docs/SERVER-OPERATIONS.md) sampai selesai seb
 deployment, update aplikasi di server, migration produksi, perubahan environment variable,
 backup/restore, perubahan domain, atau troubleshooting Coolify.
 
-## Konteks produksi (diperbarui 2026-08-06)
+## Konteks produksi (diperbarui 2026-08-29, rilis OAuth MCP)
 
-- URL produksi: `https://safety5s.irfan-apps.online`.
+- **OAuth 2.1 authorization server untuk MCP** ditambahkan di rilis
+  `release-20260829-234754` (image digest
+  `sha256:dd560a1814044d07dc50480060f34c83d0dbc27186a6a6cea59089a2185018d5`),
+  supaya `/api/mcp` bisa dipasang sebagai custom connector di **claude.ai web**
+  dan **ChatGPT web** (keduanya mensyaratkan OAuth, bukan static token).
+  Endpoint MCP tetap bisa diakses dengan `MCP_TOKEN` statis (jalur lama,
+  Claude Code CLI dsb) — OAuth cuma jalur tambahan, tidak menggantikan.
+  - Endpoint baru: `/oauth/authorize` (halaman consent, gate-nya password
+    admin terpisah — BUKAN akun NPK), `/oauth/token`,
+    `/.well-known/oauth-protected-resource/api/mcp` (RFC 9728, path-aware
+    karena resource URL `/api/mcp`), `/.well-known/oauth-authorization-server`
+    (RFC 8414).
+  - Resource identity di-fix ke `https://safety5s.com/api/mcp` — saat setup
+    connector di claude.ai/ChatGPT, URL MCP server **wajib** `safety5s.com`
+    (bukan `irfan-apps.online`), karena audience token divalidasi persis
+    terhadap nilai itu.
+  - Secret baru di `runtime.env`: `MCP_OAUTH_CLIENT_ID`, `MCP_OAUTH_CLIENT_SECRET`
+    (pre-registered client, ditempel manual user di UI connector),
+    `MCP_OAUTH_ADMIN_PASSWORD` (password consent, terpisah dari akun NPK
+    manapun sesuai keputusan user). Nilai tersimpan sekali di
+    `/root/secure/aai-5s-safety-greenfield/oauth-credentials-for-user.txt`
+    (root-only) untuk diserahkan ke user — hapus setelah user konfirmasi
+    sudah disimpan di tempat aman.
+  - Tabel Prisma baru (migration `20260829213000_oauth_authorization_server`,
+    murni tabel baru, tidak mengubah tabel lama): `OAuthAuthCode` (kode
+    otorisasi sekali-pakai, TTL 5 menit, consume atomik via raw SQL),
+    `OAuthToken` (access token 1 jam + refresh token 30 hari, rotate saat
+    refresh, simpan **hash** SHA-256 bukan raw value).
+  - `src/proxy.ts` — `/oauth` dan `/.well-known` ditambahkan ke
+    `PUBLIC_PATHS` (di luar gate sesi NPK; punya gate sendiri via password
+    admin). Jangan hilangkan ini saat edit `proxy.ts` — tanpanya halaman
+    consent & metadata discovery ke-redirect ke `/login`.
+  - PKCE S256 wajib di-enforce, redirect_uri di-whitelist eksplisit
+    (`https://claude.ai/api/mcp/auth_callback`, `https://chatgpt.com/connector_platform_oauth_redirect`,
+    `https://chatgpt.com/connector/oauth/*`) via parsing `URL()` (bukan
+    string prefix) di `src/lib/oauth.ts`.
+  - **Pelajaran penting**: `withMcpAuth` dari paket `mcp-handler` punya
+    default `required: false` — TANPA `required: true` eksplisit, request
+    tanpa token akan diteruskan ke handler MCP TANPA cek auth sama sekali.
+    Ini sempat ke-deploy tanpa sengaja (celah singkat, langsung diperbaiki).
+    Selalu set `required: true` eksplisit kalau pernah refactor
+    `src/app/api/mcp/route.ts`.
+  - Uji end-to-end penuh (authorize → consent → code → token exchange →
+    panggil tool MCP) sudah diverifikasi jalan via curl (simulasi form
+    server-action Next.js) sebelum rilis dianggap selesai.
+
+## Konteks produksi (diperbarui 2026-08-29, domain)
+
+- URL produksi: `https://safety5s.irfan-apps.online`, juga dapat diakses via domain custom
+  `https://safety5s.com` dan `https://www.safety5s.com` (ditambahkan 2026-08-29; user sudah
+  mengarahkan DNS domain tersebut ke `109.199.98.96`). Ketiga host dilayani oleh container yang
+  sama (`safety5s-greenfield-app`) via satu Traefik router dengan rule
+  `(Host(safety5s.irfan-apps.online) || Host(safety5s.com) || Host(www.safety5s.com)) && PathPrefix(/)`
+  di `/root/apps/aai-5s-safety-v2/compose.greenfield.yml`. TLS Let's Encrypt aktif untuk ketiganya.
+  Backup file compose sebelum perubahan: `compose.greenfield.yml.bak-20260829-204105` (di server,
+  folder yang sama).
 - **Bukan lagi via Coolify Application.** App Coolify lama `aai-5s-safety`
   (`safety.irfan-apps.online`, UUID `z7bmnywrsgm68nbrhrc1822v`) sudah **dihapus** pada
   2026-08-06 atas permintaan user; jangan membuatnya ulang.
