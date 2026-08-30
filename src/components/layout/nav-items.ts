@@ -13,7 +13,8 @@ export type NavItem = {
     | "trophy"
     | "checklist"
     | "tv"
-    | "building";
+    | "building"
+    | "book";
   roles?: Role[]; // undefined = semua role
   mobile?: boolean; // tampil di bottom nav HP
 };
@@ -42,6 +43,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   { href: "/leaderboard", label: "Peringkat", icon: "trophy" },
   { href: "/galeri", label: "Safety & 5S Live Wall", icon: "tv" },
+  { href: "/panduan", label: "Panduan", icon: "book" },
   { href: "/admin", label: "Admin", icon: "building", roles: ["ADMIN"] },
   { href: "/profil", label: "Profil", icon: "user", mobile: true },
 ];

@@ -9,6 +9,7 @@ import {
   IconChecklist,
   IconTv,
   IconBuilding,
+  IconBook,
 } from "@/components/icons";
 import type { NavItem } from "./nav-items";
 
@@ -23,6 +24,7 @@ const MAP = {
   checklist: IconChecklist,
   tv: IconTv,
   building: IconBuilding,
+  book: IconBook,
 } as const;
 
 export function NavIcon({

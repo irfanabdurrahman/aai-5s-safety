@@ -1,0 +1,80 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: safety5s-greenfield-db
+    restart: unless-stopped
+    env_file:
+      - /root/secure/aai-5s-safety-greenfield/database.env
+    volumes:
+      - safety5s-greenfield-db-data:/var/lib/postgresql/data
+    networks:
+      - safety5s-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  migrate:
+    image: 127.0.0.1:5000/aai-5s-safety@sha256:24205a5995f82065588c508d004c5a71f0edaa05eb0d5b2b8939a0b6ed143f4a
+    profiles: ["migration"]
+    env_file:
+      - /root/secure/aai-5s-safety-greenfield/migration.env
+    command: ["npx", "prisma", "migrate", "deploy", "--schema=/app/prisma/schema.prisma"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - safety5s-internal
+
+  app:
+    image: 127.0.0.1:5000/aai-5s-safety@sha256:24205a5995f82065588c508d004c5a71f0edaa05eb0d5b2b8939a0b6ed143f4a
+    container_name: safety5s-greenfield-app
+    restart: unless-stopped
+    env_file:
+      - /root/secure/aai-5s-safety-greenfield/runtime.env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      UPLOAD_DIR: /app/uploads
+      APP_RELEASE_ID: release-20260830-151109
+      APP_SCHEMA_MARKER: 20260719193500_audit_schedule_created_at
+    volumes:
+      - safety5s-greenfield-uploads:/app/uploads
+    networks:
+      - safety5s-internal
+      - coolify
+    depends_on:
+      db:
+        condition: service_healthy
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "coolify"
+      traefik.http.middlewares.safety5s-greenfield-gzip.compress: "true"
+      traefik.http.middlewares.safety5s-greenfield-redirect.redirectscheme.scheme: "https"
+      traefik.http.routers.safety5s-greenfield-http.entrypoints: "http"
+      traefik.http.routers.safety5s-greenfield-http.middlewares: "safety5s-greenfield-redirect"
+      traefik.http.routers.safety5s-greenfield-http.rule: "(Host(`safety5s.irfan-apps.online`) || Host(`safety5s.com`) || Host(`www.safety5s.com`)) && PathPrefix(`/`)"
+      traefik.http.routers.safety5s-greenfield-http.service: "safety5s-greenfield"
+      traefik.http.routers.safety5s-greenfield-https.entrypoints: "https"
+      traefik.http.routers.safety5s-greenfield-https.middlewares: "safety5s-greenfield-gzip"
+      traefik.http.routers.safety5s-greenfield-https.rule: "(Host(`safety5s.irfan-apps.online`) || Host(`safety5s.com`) || Host(`www.safety5s.com`)) && PathPrefix(`/`)"
+      traefik.http.routers.safety5s-greenfield-https.service: "safety5s-greenfield"
+      traefik.http.routers.safety5s-greenfield-https.tls: "true"
+      traefik.http.routers.safety5s-greenfield-https.tls.certresolver: "letsencrypt"
+      traefik.http.services.safety5s-greenfield.loadbalancer.server.port: "3000"
+
+volumes:
+  safety5s-greenfield-db-data:
+    name: safety5s-greenfield-db-data
+  safety5s-greenfield-uploads:
+    name: safety5s-greenfield-uploads
+
+networks:
+  safety5s-internal:
+    name: safety5s-greenfield-internal
+    internal: true
+  coolify:
+    external: true

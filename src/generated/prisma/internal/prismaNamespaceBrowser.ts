@@ -67,7 +67,9 @@ export const ModelName = {
   Notification: 'Notification',
   Counter: 'Counter',
   LoginThrottle: 'LoginThrottle',
-  AccountResetBatch: 'AccountResetBatch'
+  AccountResetBatch: 'AccountResetBatch',
+  OAuthAuthCode: 'OAuthAuthCode',
+  OAuthToken: 'OAuthToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -308,6 +310,35 @@ export const AccountResetBatchScalarFieldEnum = {
 } as const
 
 export type AccountResetBatchScalarFieldEnum = (typeof AccountResetBatchScalarFieldEnum)[keyof typeof AccountResetBatchScalarFieldEnum]
+
+
+export const OAuthAuthCodeScalarFieldEnum = {
+  codeHash: 'codeHash',
+  clientId: 'clientId',
+  redirectUri: 'redirectUri',
+  codeChallenge: 'codeChallenge',
+  resource: 'resource',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type OAuthAuthCodeScalarFieldEnum = (typeof OAuthAuthCodeScalarFieldEnum)[keyof typeof OAuthAuthCodeScalarFieldEnum]
+
+
+export const OAuthTokenScalarFieldEnum = {
+  id: 'id',
+  accessTokenHash: 'accessTokenHash',
+  refreshTokenHash: 'refreshTokenHash',
+  clientId: 'clientId',
+  resource: 'resource',
+  expiresAt: 'expiresAt',
+  refreshExpiresAt: 'refreshExpiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type OAuthTokenScalarFieldEnum = (typeof OAuthTokenScalarFieldEnum)[keyof typeof OAuthTokenScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -181,3 +181,11 @@ export const IconChecklist = (p: IconProps) => (
     <path d="M11 6.5h10M11 13h10M11 19.5h10" />
   </svg>
 );
+
+export const IconBook = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v18H6.5A2.5 2.5 0 0 1 4 18.5v-13Z" />
+    <path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H12v18h5.5a2.5 2.5 0 0 0 2.5-2.5v-13Z" />
+    <path d="M12 3v18" />
+  </svg>
+);

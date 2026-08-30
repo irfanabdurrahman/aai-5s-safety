@@ -12,7 +12,10 @@ export function clientIpFromHeaders(headers: Headers): string {
   return headers.get("x-real-ip")?.trim() || "unknown";
 }
 
-export function throttleKey(scope: "account" | "ip", value: string): string {
+export function throttleKey(
+  scope: "account" | "ip" | "oauth_consent",
+  value: string,
+): string {
   const normalized = value.trim().toLowerCase();
   const digest = createHash("sha256").update(normalized).digest("hex");
   return `${scope}:${digest}`;

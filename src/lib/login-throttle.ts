@@ -5,6 +5,7 @@ const WINDOW_MINUTES = 15;
 const WINDOW_INTERVAL = `${WINDOW_MINUTES} minutes`;
 const ACCOUNT_LIMIT = 5;
 const IP_LIMIT = 30;
+const OAUTH_CONSENT_LIMIT = 5;
 
 async function consumeKey(key: string, limit: number): Promise<boolean> {
   const rows = await prisma.$queryRaw<Array<{ count: number }>>`
@@ -46,4 +47,10 @@ export async function resetLoginAttempts(npk: string): Promise<void> {
 
 export async function cleanupExpiredLoginAttempts(): Promise<void> {
   await prisma.loginThrottle.deleteMany({ where: { expiresAt: { lte: new Date() } } });
+}
+
+// Percobaan password consent OAuth (halaman /oauth/authorize) — ancaman &
+// limit terpisah dari login karyawan, key by IP saja (tidak ada akun/NPK).
+export async function consumeOAuthConsentAttempt(ip: string): Promise<boolean> {
+  return consumeKey(throttleKey("oauth_consent", ip), OAUTH_CONSENT_LIMIT);
 }

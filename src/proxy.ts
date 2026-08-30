@@ -9,7 +9,16 @@ import {
 } from "@/lib/kiosk-session";
 
 // /galeri cek auth sendiri (token TV ATAU sesi login)
-const PUBLIC_PATHS = ["/login", "/tv", "/galeri", "/manifest.webmanifest"];
+// /oauth & /.well-known: authorization server MCP, gate-nya password admin
+// terpisah (bukan sesi NPK) — lihat src/actions/oauth.ts
+const PUBLIC_PATHS = [
+  "/login",
+  "/tv",
+  "/galeri",
+  "/manifest.webmanifest",
+  "/oauth",
+  "/.well-known",
+];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

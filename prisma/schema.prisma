@@ -371,3 +371,34 @@ model AccountResetBatch {
   userCount   Int
   committedAt DateTime @default(now())
 }
+
+// ============================================================
+// OAuth authorization server untuk MCP (claude.ai web, ChatGPT web)
+// ============================================================
+
+model OAuthAuthCode {
+  codeHash      String    @id
+  clientId      String
+  redirectUri   String
+  codeChallenge String
+  resource      String
+  expiresAt     DateTime
+  consumedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([expiresAt])
+}
+
+model OAuthToken {
+  id               String    @id @default(cuid())
+  accessTokenHash  String    @unique
+  refreshTokenHash String?   @unique
+  clientId         String
+  resource         String
+  expiresAt        DateTime
+  refreshExpiresAt DateTime?
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([expiresAt])
+}

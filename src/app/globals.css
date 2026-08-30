@@ -124,3 +124,242 @@ body {
 .galeri-slide {
   animation: galeri-in 0.7s ease-out;
 }
+
+/* ============================================================
+   Papan Peringkat — podium juara pelapor
+   ============================================================ */
+
+.lb-shield {
+  clip-path: polygon(50% 0%, 100% 14%, 100% 58%, 50% 100%, 0% 58%, 0% 14%);
+}
+.lb-badge-outline {
+  position: absolute;
+  inset: -4px;
+  background: #fff;
+  filter: drop-shadow(0 7px 14px rgba(16, 24, 40, 0.22));
+}
+.lb-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+}
+.lb-badge.gold {
+  background: radial-gradient(
+    circle at 35% 24%,
+    #fff6cf,
+    #ffd23f 42%,
+    #e8a317 74%,
+    #a8730c 100%
+  );
+}
+.lb-badge.silver {
+  background: radial-gradient(
+    circle at 35% 24%,
+    #d9ecff,
+    #5cb2ff 42%,
+    #2472d8 74%,
+    #17408a 100%
+  );
+}
+.lb-badge.bronze {
+  background: radial-gradient(
+    circle at 35% 24%,
+    #cdfaf1,
+    #3ed6c4 42%,
+    #12a594 74%,
+    #0c6459 100%
+  );
+}
+.lb-badge::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -70%;
+  width: 45%;
+  height: 220%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.8),
+    transparent
+  );
+  transform: rotate(22deg);
+  animation: lb-shimmer 3.4s ease-in-out infinite;
+}
+
+.lb-rank-label {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.lb-rank-label.gold {
+  background: linear-gradient(90deg, #ffdd6b, #e8a317);
+  color: #6b3f06;
+  box-shadow: 0 3px 8px rgba(232, 163, 23, 0.4);
+}
+.lb-rank-label.silver {
+  background: linear-gradient(90deg, #5cb2ff, #2472d8);
+  box-shadow: 0 3px 8px rgba(36, 114, 216, 0.35);
+}
+.lb-rank-label.bronze {
+  background: linear-gradient(90deg, #3ed6c4, #12a594);
+  box-shadow: 0 3px 8px rgba(18, 165, 148, 0.35);
+}
+
+.lb-count-gold {
+  color: #a8730c;
+}
+.lb-count-silver {
+  color: #17408a;
+}
+.lb-count-bronze {
+  color: #0c6459;
+}
+
+.lb-pod-first {
+  background: linear-gradient(180deg, #fff9ec, #fff3e0);
+  border: 1px solid #f6d9b8;
+  box-shadow: 0 14px 30px -14px rgba(232, 163, 23, 0.45);
+}
+
+.lb-sunburst {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 190px;
+  height: 190px;
+  margin-left: -95px;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 196, 64, 0.4) 0deg 7deg,
+    transparent 7deg 22deg
+  );
+  border-radius: 50%;
+  animation: lb-spin 22s linear infinite;
+  pointer-events: none;
+}
+.lb-crown {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-6deg);
+  font-size: 32px;
+  filter: drop-shadow(0 3px 5px rgba(154, 74, 15, 0.4));
+}
+.lb-sparkle {
+  position: absolute;
+  font-size: 15px;
+  opacity: 0.95;
+  animation: lb-twinkle 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+.lb-sparkle-l {
+  top: 8px;
+  left: 6px;
+}
+.lb-sparkle-r {
+  top: 2px;
+  right: 4px;
+  animation-delay: 0.8s;
+}
+.lb-sparkle-b {
+  bottom: 6px;
+  left: -6px;
+  font-size: 12px;
+  animation-delay: 1.4s;
+}
+
+.lb-confetti span {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--c);
+  opacity: 0.16;
+}
+
+.lb-bar-track {
+  height: 5px;
+  border-radius: 999px;
+  background: #eceef5;
+  overflow: hidden;
+}
+.lb-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7b83dd, var(--brand-primary));
+}
+
+.lb-ontime-track {
+  height: 6px;
+  flex: 1;
+  border-radius: 999px;
+  background: #eceef5;
+  overflow: hidden;
+}
+.lb-ontime-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #57cf8f, var(--ok));
+}
+
+@keyframes lb-rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes lb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes lb-twinkle {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+@keyframes lb-shimmer {
+  0% {
+    left: -70%;
+  }
+  55%,
+  100% {
+    left: 130%;
+  }
+}
+
+.lb-pod {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: lb-rise 0.5s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-pod,
+  .lb-sunburst,
+  .lb-sparkle,
+  .lb-badge::after {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .lb-badge::after {
+    display: none;
+  }
+}

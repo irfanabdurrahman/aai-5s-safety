@@ -24,7 +24,7 @@ export * as $Enums from './enums'
 export * from "./enums"
 /**
  * ## Prisma Client
- *
+ * 
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -34,7 +34,7 @@ export * from "./enums"
  * // Fetch zero or more Departments
  * const departments = await prisma.department.findMany()
  * ```
- *
+ * 
  * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
@@ -43,86 +43,96 @@ export { Prisma }
 
 /**
  * Model Department
- *
+ * 
  */
 export type Department = Prisma.DepartmentModel
 /**
  * Model Area
- *
+ * 
  */
 export type Area = Prisma.AreaModel
 /**
  * Model Line
- *
+ * 
  */
 export type Line = Prisma.LineModel
 /**
  * Model User
- *
+ * 
  */
 export type User = Prisma.UserModel
 /**
  * Model ChecklistTemplate
- *
+ * 
  */
 export type ChecklistTemplate = Prisma.ChecklistTemplateModel
 /**
  * Model ChecklistCriterion
- *
+ * 
  */
 export type ChecklistCriterion = Prisma.ChecklistCriterionModel
 /**
  * Model AuditSchedule
- *
+ * 
  */
 export type AuditSchedule = Prisma.AuditScheduleModel
 /**
  * Model Audit
- *
+ * 
  */
 export type Audit = Prisma.AuditModel
 /**
  * Model AuditScore
- *
+ * 
  */
 export type AuditScore = Prisma.AuditScoreModel
 /**
  * Model Finding
- *
+ * 
  */
 export type Finding = Prisma.FindingModel
 /**
  * Model FindingPhoto
- *
+ * 
  */
 export type FindingPhoto = Prisma.FindingPhotoModel
 /**
  * Model FindingStatusHistory
- *
+ * 
  */
 export type FindingStatusHistory = Prisma.FindingStatusHistoryModel
 /**
  * Model Comment
- *
+ * 
  */
 export type Comment = Prisma.CommentModel
 /**
  * Model Notification
- *
+ * 
  */
 export type Notification = Prisma.NotificationModel
 /**
  * Model Counter
- *
+ * 
  */
 export type Counter = Prisma.CounterModel
 /**
  * Model LoginThrottle
- *
+ * 
  */
 export type LoginThrottle = Prisma.LoginThrottleModel
 /**
  * Model AccountResetBatch
- *
+ * 
  */
 export type AccountResetBatch = Prisma.AccountResetBatchModel
+/**
+ * Model OAuthAuthCode
+ * 
+ */
+export type OAuthAuthCode = Prisma.OAuthAuthCodeModel
+/**
+ * Model OAuthToken
+ * 
+ */
+export type OAuthToken = Prisma.OAuthTokenModel
