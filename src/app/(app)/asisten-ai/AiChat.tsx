@@ -32,6 +32,13 @@ type Conversation = {
   messages: Message[];
 };
 
+type StreamEvent =
+  | { type: "status"; message: string }
+  | { type: "meta"; conversationId: string; model: string }
+  | { type: "delta"; content: string }
+  | { type: "done"; conversationId: string; model: string }
+  | { type: "error"; message: string };
+
 const EXAMPLES = [
   "Ringkas kondisi temuan safety dan risiko yang perlu diprioritaskan hari ini.",
   "Apa rekomendasi 5S untuk mengurangi temuan berulang di area produksi?",
@@ -99,13 +106,25 @@ export function AiChat({
   const [messages, setMessages] = useState<Message[]>(initialConversation?.messages ?? []);
   const [question, setQuestion] = useState("");
   const [pending, setPending] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const empty = useMemo(() => messages.length === 0, [messages.length]);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, pending]);
+    endRef.current?.scrollIntoView({ behavior: pending ? "auto" : "smooth" });
+  }, [messages, pending, status]);
+
+  useEffect(() => {
+    if (!pending) return;
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [pending]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,24 +132,90 @@ export function AiChat({
     if (!text || pending || !enabled) return;
     setError(null);
     setQuestion("");
-    setMessages((current) => [...current, { id: `user-${Date.now()}`, role: "USER", content: text }]);
+    const requestId = Date.now();
+    const assistantId = `assistant-${requestId}`;
+    setMessages((current) => [...current, { id: `user-${requestId}`, role: "USER", content: text }]);
     setPending(true);
+    setStatus("Mengirim pertanyaan…");
+    setElapsedSeconds(0);
+    setStreamingMessageId(null);
     try {
       const response = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversationId, message: text }),
       });
-      const payload = (await response.json()) as { conversationId?: string; answer?: string; error?: string };
-      if (!response.ok || !payload.answer || !payload.conversationId) throw new Error(payload.error || "Jawaban AI tidak tersedia");
-      setConversationId(payload.conversationId);
-      setMessages((current) => [...current, { id: `assistant-${Date.now()}`, role: "ASSISTANT", content: payload.answer! }]);
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error || "Jawaban AI tidak tersedia");
+      }
+      if (!response.body) throw new Error("Browser tidak menerima aliran jawaban AI");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let answer = "";
+      let completed = false;
+
+      const handleEvent = (streamEvent: StreamEvent) => {
+        if (streamEvent.type === "status") {
+          setStatus(streamEvent.message);
+          return;
+        }
+        if (streamEvent.type === "meta") {
+          setConversationId(streamEvent.conversationId);
+          return;
+        }
+        if (streamEvent.type === "delta") {
+          answer += streamEvent.content;
+          setStreamingMessageId(assistantId);
+          setMessages((current) => {
+            const existing = current.findIndex((item) => item.id === assistantId);
+            if (existing < 0) {
+              return [
+                ...current,
+                { id: assistantId, role: "ASSISTANT", content: answer },
+              ];
+            }
+            return current.map((item, index) =>
+              index === existing ? { ...item, content: answer } : item,
+            );
+          });
+          return;
+        }
+        if (streamEvent.type === "done") {
+          completed = true;
+          setConversationId(streamEvent.conversationId);
+          return;
+        }
+        throw new Error(streamEvent.message);
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        buffer += decoder.decode(value, { stream: !done });
+        let newline = buffer.indexOf("\n");
+        while (newline >= 0) {
+          const line = buffer.slice(0, newline).trim();
+          buffer = buffer.slice(newline + 1);
+          if (line) handleEvent(JSON.parse(line) as StreamEvent);
+          newline = buffer.indexOf("\n");
+        }
+        if (done) break;
+      }
+      if (buffer.trim()) handleEvent(JSON.parse(buffer) as StreamEvent);
+      if (!completed || !answer.trim()) {
+        throw new Error("Aliran jawaban AI berhenti sebelum selesai");
+      }
     } catch (reason) {
-      setMessages((current) => current.slice(0, -1));
-      setQuestion(text);
+      setMessages((current) => current.filter((item) => item.id !== assistantId));
       setError(reason instanceof Error ? reason.message : "AI Safety Assistant tidak dapat dihubungi");
     } finally {
       setPending(false);
+      setStatus(null);
+      setStreamingMessageId(null);
     }
   }
 
@@ -140,6 +225,8 @@ export function AiChat({
     setMessages([]);
     setQuestion("");
     setError(null);
+    setStatus(null);
+    setElapsedSeconds(0);
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -185,14 +272,27 @@ export function AiChat({
                 <div key={message.id} className={`flex ${message.role === "USER" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${message.role === "USER" ? "bg-brand text-white" : "border border-line bg-surface text-foreground"}`}>
                     {message.role === "ASSISTANT" ? (
-                      <AssistantMessage content={message.content} />
+                      <div aria-live={message.id === streamingMessageId ? "polite" : undefined}>
+                        <AssistantMessage content={message.content} />
+                        {message.id === streamingMessageId && (
+                          <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-full bg-brand align-text-bottom" aria-hidden="true" />
+                        )}
+                      </div>
                     ) : (
                       message.content
                     )}
                   </div>
                 </div>
               ))}
-              {pending && <div className="flex justify-start"><div className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm text-muted">Menganalisis data Safety5S…</div></div>}
+              {pending && status && (
+                <div className="flex justify-start" role="status" aria-live="polite">
+                  <div className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3 text-sm text-muted">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-brand" aria-hidden="true" />
+                    <span>{status}</span>
+                    <span className="tabular-nums text-[11px]">{elapsedSeconds} detik</span>
+                  </div>
+                </div>
+              )}
               <div ref={endRef} />
             </CardBody>
             <form onSubmit={submit} className="border-t border-line bg-surface p-3 sm:p-4">

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import type { CurrentUser } from "@/lib/auth";
 import type { Prisma } from "@/generated/prisma/client";
 import { wibToday } from "@/lib/dates";
+import { readOpenAiChatStream } from "@/lib/ai-stream";
 
 export const AI_API_KEY_ENV_VARS = [
   "DEEPSEEK_API_KEY",
@@ -446,15 +447,78 @@ async function callProvider(
   return payload;
 }
 
-export async function askSafetyAssistant({
+async function callProviderStream(
+  settings: AiSettingsValue,
+  messages: Array<{ role: string; content: string }>,
+  requestSignal: AbortSignal,
+) {
+  const body: Record<string, unknown> = {
+    model: settings.model,
+    messages,
+    max_tokens: settings.maxOutputTokens,
+    stream: true,
+  };
+  if (settings.provider === "DEEPSEEK") {
+    body.thinking = {
+      type: settings.enableThinking ? "enabled" : "disabled",
+    };
+    if (settings.enableThinking) {
+      body.reasoning_effort = settings.reasoningEffort;
+    }
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(completionUrl(settings.baseUrl), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKeyFor(settings)}`,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.any([
+        requestSignal,
+        AbortSignal.timeout(180_000),
+      ]),
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error("Layanan AI tidak dapat dihubungi. Coba lagi sebentar.");
+  }
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("Kredensial LLM ditolak. Hubungi Admin.");
+    }
+    if (response.status === 429) {
+      throw new Error("Batas penggunaan LLM tercapai. Coba beberapa saat lagi.");
+    }
+    throw new Error(`Layanan AI gagal merespons (HTTP ${response.status}).`);
+  }
+  if (!response.body) {
+    throw new Error("Layanan AI merespons tanpa aliran jawaban.");
+  }
+  return response.body;
+}
+
+export type SafetyAssistantStreamEvent =
+  | { type: "status"; message: string }
+  | { type: "meta"; conversationId: string; model: string }
+  | { type: "delta"; content: string }
+  | { type: "done"; conversationId: string; model: string };
+
+export async function* streamSafetyAssistant({
   user,
   conversationId,
   question,
+  signal,
 }: {
   user: CurrentUser;
   conversationId?: string;
   question: string;
-}) {
+  signal: AbortSignal;
+}): AsyncGenerator<SafetyAssistantStreamEvent> {
+  yield { type: "status", message: "Menyiapkan percakapan…" };
   const message = cleanText(question);
   if (message.length < 2) throw new Error("Tulis pertanyaan terlebih dahulu");
   const settings = await getAiSettings();
@@ -486,6 +550,12 @@ export async function askSafetyAssistant({
   await prisma.aiMessage.create({
     data: { conversationId: conversation.id, role: "USER", content: message },
   });
+  yield {
+    type: "meta",
+    conversationId: conversation.id,
+    model: settings.model,
+  };
+  yield { type: "status", message: "Membaca data Safety5S…" };
   const [historyNewest, context] = await Promise.all([
     prisma.aiMessage.findMany({
       where: { conversationId: conversation.id },
@@ -496,7 +566,7 @@ export async function askSafetyAssistant({
     safetyContext(message),
   ]);
   const history: ChatHistory[] = historyNewest.reverse();
-  const payload = await callProvider(settings, [
+  const messages = [
     {
       role: "system",
       content: systemInstruction(user, context, settings.systemPrompt),
@@ -505,11 +575,32 @@ export async function askSafetyAssistant({
       role: item.role === "USER" ? "user" : "assistant",
       content: item.content,
     })),
-  ]);
-  const answer = cleanText(
-    payload?.choices?.[0]?.message?.content ?? "",
-    30_000,
-  );
+  ];
+
+  yield { type: "status", message: "AI sedang menganalisis…" };
+  const providerStream = await callProviderStream(settings, messages, signal);
+  let answer = "";
+  let promptTokens: number | undefined;
+  let completionTokens: number | undefined;
+  let hasStartedWriting = false;
+
+  for await (const part of readOpenAiChatStream(providerStream)) {
+    if (part.promptTokens !== undefined) promptTokens = part.promptTokens;
+    if (part.completionTokens !== undefined) {
+      completionTokens = part.completionTokens;
+    }
+    if (!part.content || answer.length >= 30_000) continue;
+
+    if (!hasStartedWriting) {
+      hasStartedWriting = true;
+      yield { type: "status", message: "Menulis jawaban…" };
+    }
+    const content = part.content.slice(0, 30_000 - answer.length);
+    answer += content;
+    yield { type: "delta", content };
+  }
+
+  answer = cleanText(answer, 30_000);
   if (!answer) {
     throw new Error("AI tidak mengembalikan jawaban. Coba ulangi pertanyaan.");
   }
@@ -521,8 +612,8 @@ export async function askSafetyAssistant({
         role: "ASSISTANT",
         content: answer,
         model: settings.model,
-        promptTokens: payload?.usage?.prompt_tokens ?? null,
-        completionTokens: payload?.usage?.completion_tokens ?? null,
+        promptTokens: promptTokens ?? null,
+        completionTokens: completionTokens ?? null,
       },
     }),
     prisma.aiConversation.update({
@@ -530,7 +621,11 @@ export async function askSafetyAssistant({
       data: { updatedAt: new Date() },
     }),
   ]);
-  return { conversationId: conversation.id, answer, model: settings.model };
+  yield {
+    type: "done",
+    conversationId: conversation.id,
+    model: settings.model,
+  };
 }
 
 export async function testAiConnection() {
