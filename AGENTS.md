@@ -26,6 +26,23 @@ fast-forward) — jangan merge/rebase salah satu ke `main` tanpa rekonsiliasi ek
 - `main` di repo ini tetap dipakai untuk kerja desain/redesign v2 yang belum tentu sama dengan
   yang jalan di produksi — lihat juga bagian "Konteks produksi" di bawah untuk detail per rilis.
 
+## Rilis terakhir yang live (2026-09-02)
+
+- Rilis **`release-20260902-130644`** (image digest `sha256:a0535cfd…`) — inilah yang berjalan
+  di https://safety5s.com sekarang, dan sudah tercatat di branch `production-hardened`
+  (commit `3c8b0fe`). Repo server, GitHub, dan container sudah diverifikasi identik.
+- **Bug yang diperbaiki di rilis ini — jangan diulang:** `AppLayout`
+  (`src/app/(app)/layout.tsx`) memanggil `requireUser()` tanpa argumen kedua. Karena layout ini
+  juga membungkus `/profil`, user dengan `mustChangePassword=true` dialihkan ke `/profil` oleh
+  layout-nya sendiri, lalu dialihkan lagi oleh layout yang sama → **redirect loop tak terbatas,
+  user terkunci total** dan tidak bisa mengganti password sama sekali. Praktis semua akun baru
+  tidak bisa memakai aplikasi.
+  Perbaikannya: `requireUser(undefined, true)` — pengalihan wajib-ganti-password sudah ditangani
+  middleware `src/proxy.ts` untuk semua path selain `/profil`, jadi layout tidak boleh ikut
+  mengalihkan. Kalau suatu saat `layout.tsx` di-refactor, pertahankan argumen kedua itu.
+- Verifikasi cepat kalau ragu: login akun ber-`mustChangePassword`, lalu `GET /profil` harus
+  **200** (bukan 307 berulang), sementara halaman lain tetap 307 ke `/profil`.
+
 ## Konteks produksi (diperbarui 2026-08-29, rilis OAuth MCP)
 
 - **OAuth 2.1 authorization server untuk MCP** ditambahkan di rilis
