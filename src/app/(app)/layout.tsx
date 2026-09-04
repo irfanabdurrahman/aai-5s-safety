@@ -12,7 +12,11 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await requireUser();
+  // allowPasswordChange=true: layout ini membungkus /profil juga, jadi kalau ia
+  // ikut mengalihkan user ber-mustChangePassword ke /profil, hasilnya redirect
+  // loop tak terbatas dan user terkunci total. Pengalihan wajib-ganti-password
+  // sudah ditangani middleware (src/proxy.ts) untuk semua path selain /profil.
+  const user = await requireUser(undefined, true);
   const items = navForRole(user.role);
 
   return (
